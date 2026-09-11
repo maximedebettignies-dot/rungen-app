@@ -16,8 +16,12 @@ App mobile open source de suivi sportif grand public ("Strava premium gratuit"),
 ## Règles non négociables
 
 - Les règles sensibles sont appliquées **en base** (triggers + RLS), l'app ne fait que les refléter.
-- Âge minimum 15 ans ; mineurs (15–17) toujours en visibilité `prive` ; date de naissance jamais exposée aux autres et non modifiable.
+- Deux espaces : `public` (15 ans min.) et `rungen` (11 ans min., accès uniquement par code individuel lié à une autorisation parentale). L'espace d'un compte ne change jamais.
+- **Le public ne voit jamais un membre RUNGEN** (recherche, profil, contact). Toute nouvelle fonctionnalité sociale doit le garantir en base et le tester.
+- Mineurs toujours en visibilité `prive` ; date de naissance jamais exposée aux autres et non modifiable.
 - Visibilité par défaut des adultes : `amis`.
+- Rôles : `admin` et `prof_eps` (limité à son établissement), pouvoirs actifs uniquement en double authentification (`aal2`).
+- Support : messages jamais modifiables ni supprimables ; l'admin ne peut que répondre.
 - Suppression de compte possible depuis l'app (Apple + RGPD).
 - Pas de données de santé (poids, cardio) en V1.
 
@@ -29,7 +33,7 @@ App mobile open source de suivi sportif grand public ("Strava premium gratuit"),
 ## Commandes
 
 - Tests logique d'âge : `node --experimental-strip-types --test src/lib/age.test.ts`
-- Tests base (Postgres local) : `PGHOST=localhost PGPORT=5432 PGUSER=postgres bash supabase/tests/run.sh`
+- Tests base (Postgres local, chaque fichier `*_test.sql` sur une base neuve) : `PGHOST=localhost PGPORT=5432 PGUSER=postgres bash supabase/tests/run.sh`
 
 ## Découpage V1
 

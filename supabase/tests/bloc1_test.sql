@@ -1,27 +1,7 @@
 -- Tests du bloc 1 : chaque bloc DO lève une exception si une règle n'est pas respectée.
 \set ON_ERROR_STOP on
 
--- Utilitaires de test
-create or replace function pg_temp.as_user(uid uuid) returns void language plpgsql as $$
-begin
-  perform set_config('request.jwt.claim.sub', coalesce(uid::text, ''), false);
-  execute 'set role authenticated';
-end $$;
-create or replace function pg_temp.as_admin() returns void language plpgsql as $$
-begin
-  execute 'reset role';
-  perform set_config('request.jwt.claim.sub', '', false);
-end $$;
-create or replace function pg_temp.expect_error(stmt text, expected text) returns void language plpgsql as $$
-begin
-  execute stmt;
-  raise exception 'ÉCHEC : aucune erreur pour [%], attendu [%]', stmt, expected;
-exception when others then
-  if sqlerrm like 'ÉCHEC%' then raise; end if;
-  if position(expected in sqlerrm) = 0 then
-    raise exception 'ÉCHEC : erreur inattendue pour [%] : % (attendu %)', stmt, sqlerrm, expected;
-  end if;
-end $$;
+\ir 01_helpers.sql
 
 insert into auth.users (id, email) values
   ('00000000-0000-0000-0000-00000000000a', 'adulte@test.fr'),

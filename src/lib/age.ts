@@ -1,6 +1,8 @@
 export type Visibility = 'public' | 'amis' | 'prive';
+export type Space = 'public' | 'rungen';
 
-export const MIN_REGISTRATION_AGE = 15;
+/** Âge minimum d'inscription par espace (miroir de la base). */
+export const MIN_REGISTRATION_AGE: Record<Space, number> = { public: 15, rungen: 11 };
 export const MAJORITY_AGE = 18;
 
 /** Âge en années révolues à une date donnée (dates locales). */
@@ -13,9 +15,9 @@ export function ageOn(birthDate: Date, today: Date): number {
   return age;
 }
 
-export function canRegister(birthDate: Date, today: Date = new Date()): boolean {
+export function canRegister(birthDate: Date, space: Space, today: Date = new Date()): boolean {
   if (birthDate.getTime() > today.getTime()) return false;
-  return ageOn(birthDate, today) >= MIN_REGISTRATION_AGE;
+  return ageOn(birthDate, today) >= MIN_REGISTRATION_AGE[space];
 }
 
 export function isMinor(birthDate: Date, today: Date = new Date()): boolean {

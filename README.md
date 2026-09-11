@@ -19,4 +19,4 @@ Règles de la base (Postgres 15+ local) :
 
     PGHOST=localhost PGPORT=5432 PGUSER=postgres bash supabase/tests/run.sh
 
-Le script crée une base jetable `rungen_test`, simule Supabase, applique les migrations puis lance les tests. Il affiche `TOUS LES TESTS DU BLOC 1 SONT PASSÉS` en cas de succès.
+Le script crée une base jetable `rungen_test` pour chaque fichier de test, simule Supabase, applique les migrations puis lance les tests. Il affiche `OK` ou `FAIL` par fichier et renvoie un code d'erreur en cas d'échec.
