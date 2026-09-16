@@ -92,15 +92,20 @@ export function Bouton({
   );
 }
 
-export function Champ({ label, aide, ...reste }: TextInputProps & { label: string; aide?: string }) {
+export function Champ({
+  label,
+  aide,
+  style,
+  ...reste
+}: TextInputProps & { label: string; aide?: string }) {
   return (
     <View style={styles.champ}>
       <Text style={styles.champLabel}>{label}</Text>
       <TextInput
-        style={styles.champSaisie}
         placeholderTextColor={couleurs.texteDoux}
         accessibilityLabel={label}
         {...reste}
+        style={[styles.champSaisie, style]}
       />
       {aide ? <Text style={styles.champAide}>{aide}</Text> : null}
     </View>

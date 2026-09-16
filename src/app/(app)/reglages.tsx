@@ -5,6 +5,7 @@ import { messageErreur } from '@/lib/errors';
 import { isMinor, type Visibility } from '@/lib/age';
 import { enFrancais } from '@/lib/date';
 import { useSession } from '@/lib/session';
+import { PhotoProfil } from '@/ui/photo-profil';
 import {
   Bouton,
   Carte,
@@ -83,6 +84,8 @@ export default function Reglages() {
   return (
     <Ecran>
       <Titre>Réglages</Titre>
+
+      <PhotoProfil />
 
       <Carte>
         <Paragraphe>{profil.pseudo}</Paragraphe>

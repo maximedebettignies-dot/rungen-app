@@ -172,6 +172,18 @@ export type Database = {
       admin_set_account_disabled: { Args: { p_user: string; p_disabled: boolean }; Returns: undefined };
       admin_delete_account: { Args: { p_user: string }; Returns: undefined };
       delete_my_account: { Args: Record<string, never>; Returns: undefined };
+      find_account_by_code: {
+        Args: { p_code: string };
+        Returns: {
+          user_id: string;
+          pseudo: string;
+          space: Space;
+          disabled_at: string | null;
+          establishment_name: string;
+          class_label: string | null;
+          code_status: InviteStatus;
+        }[];
+      };
     };
     Enums: {
       visibility: Visibility;

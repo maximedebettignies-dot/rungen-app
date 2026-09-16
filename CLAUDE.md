@@ -32,8 +32,10 @@ App mobile open source de suivi sportif grand public ("Strava premium gratuit"),
 
 ## Commandes
 
-- Tests logique d'âge : `node --experimental-strip-types --test src/lib/age.test.ts`
-- Tests base (Postgres local, chaque fichier `*_test.sql` sur une base neuve) : `PGHOST=localhost PGPORT=5432 PGUSER=postgres bash supabase/tests/run.sh`
+- Tests logique métier : `npm run test:unit`
+- Tests base (Postgres local, chaque fichier `*_test.sql` sur une base neuve) : `PGHOST=localhost PGPORT=5432 PGUSER=postgres npm run test:db`
+- Types : `npm run typecheck`
+- Vérifier que l'app bundle : `npx expo export --platform android`
 
 ## Découpage V1
 
