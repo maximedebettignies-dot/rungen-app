@@ -1,201 +1,73 @@
 /**
- * Types de la base, écrits à la main en miroir des migrations
- * `supabase/migrations/`. À régénérer avec `npx supabase gen types typescript`
- * quand le projet Supabase est en place.
+ * Alias lisibles pour le reste de l'app, dérivés des types générés depuis le
+ * projet Supabase (`src/lib/database.generated.ts`, produit par
+ * `npm run types:gen`).
+ *
+ * Rien n'est réécrit à la main ici : si une migration change une colonne, la
+ * régénération fait apparaître l'écart au typecheck.
  */
-export type Visibility = 'public' | 'amis' | 'prive';
-export type Space = 'public' | 'rungen';
-export type SportFamily = 'distance' | 'duree';
-export type PaceUnit = 'min_per_km' | 'km_per_h' | 'min_per_100m' | 'none';
-export type StaffRole = 'admin' | 'prof_eps';
-export type InviteKind = 'eleve' | 'prof_eps';
-export type InviteStatus = 'cree' | 'actif' | 'utilise' | 'desactive';
-export type SupportCategory = 'probleme' | 'idee' | 'autre';
-export type SupportStatus = 'nouveau' | 'en_cours' | 'resolu';
-/** Réponse de `check_invite_code`. */
+import type { Database as Genere } from './database.generated';
+
+type PublicGenere = Genere['public'];
+type FonctionsGenerees = PublicGenere['Functions'];
+
+/**
+ * Le générateur ne sait pas exprimer la nullabilité des **arguments** d'une
+ * fonction : il type `p_class_label` en `string` alors que la base accepte
+ * `null` (un lot de codes peut ne viser aucune classe). On rétablit la
+ * signature réelle ici plutôt que de forcer le type à chaque appel.
+ */
+export type Database = Omit<Genere, 'public'> & {
+  public: Omit<PublicGenere, 'Functions'> & {
+    Functions: Omit<FonctionsGenerees, 'generate_invite_codes'> & {
+      generate_invite_codes: Omit<FonctionsGenerees['generate_invite_codes'], 'Args'> & {
+        Args: Omit<FonctionsGenerees['generate_invite_codes']['Args'], 'p_class_label'> & {
+          p_class_label: string | null;
+        };
+      };
+    };
+  };
+};
+
+type Tables = PublicGenere['Tables'];
+type Enums = PublicGenere['Enums'];
+
+// Énumérations de la base
+export type Visibility = Enums['visibility'];
+export type Space = Enums['space'];
+export type SportFamily = Enums['sport_family'];
+export type PaceUnit = Enums['pace_unit'];
+export type StaffRole = Enums['staff_role'];
+export type InviteKind = Enums['invite_kind'];
+export type InviteStatus = Enums['invite_status'];
+export type SupportCategory = Enums['support_category'];
+export type SupportStatus = Enums['support_status'];
+
+/** Réponse de `check_invite_code` (la fonction renvoie un texte libre en base). */
 export type InviteCheck = 'ok' | 'en_attente' | 'utilise' | 'invalide';
 
-export type Profile = {
-  id: string;
-  pseudo: string;
-  avatar_url: string | null;
-  birth_date: string;
-  visibility: Visibility;
-  space: Space;
+// Lignes des tables
+export type Profile = Tables['profiles']['Row'];
+export type Sport = Tables['sports']['Row'];
+export type CustomSport = Tables['custom_sports']['Row'];
+export type FavoriteSport = Tables['favorite_sports']['Row'];
+export type Establishment = Tables['establishments']['Row'];
+export type StaffRoleRow = Tables['staff_roles']['Row'];
+export type InviteCode = Tables['invite_codes']['Row'];
+export type RungenMembership = Tables['rungen_memberships']['Row'];
+export type SupportThread = Tables['support_threads']['Row'];
+export type SupportMessage = Tables['support_messages']['Row'];
+
+/** Carte de profil visible par les autres : jamais la date de naissance. */
+export type PublicProfile = PublicGenere['Views']['public_profiles']['Row'];
+
+/**
+ * Compte retrouvé par `find_account_by_code`. Le générateur ne sait pas
+ * exprimer la nullabilité des colonnes renvoyées par une fonction : on la
+ * rétablit ici, conformément au schéma.
+ */
+type CompteBrut = FonctionsGenerees['find_account_by_code']['Returns'][number];
+export type CompteParCode = Omit<CompteBrut, 'disabled_at' | 'class_label'> & {
   disabled_at: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type Sport = {
-  id: number;
-  slug: string;
-  name: string;
-  family: SportFamily;
-  pace_unit: PaceUnit;
-};
-
-export type CustomSport = {
-  id: string;
-  owner_id: string;
-  name: string;
-  family: SportFamily;
-  created_at: string;
-};
-
-export type FavoriteSport = {
-  id: string;
-  user_id: string;
-  sport_id: number | null;
-  custom_sport_id: string | null;
-  created_at: string;
-};
-
-export type Establishment = { id: string; name: string; city: string | null; created_at: string };
-
-export type StaffRoleRow = {
-  user_id: string;
-  role: StaffRole;
-  establishment_id: string | null;
-  created_at: string;
-};
-
-export type InviteCode = {
-  id: string;
-  code: string;
-  kind: InviteKind;
-  establishment_id: string;
   class_label: string | null;
-  status: InviteStatus;
-  used_by: string | null;
-  created_at: string;
-  activated_at: string | null;
-  used_at: string | null;
-};
-
-export type RungenMembership = {
-  user_id: string;
-  establishment_id: string;
-  class_label: string | null;
-  invite_code_id: string | null;
-  child_consent_at: string;
-  created_at: string;
-};
-
-export type SupportThread = {
-  id: string;
-  user_id: string | null;
-  category: SupportCategory;
-  subject: string;
-  status: SupportStatus;
-  created_at: string;
-  updated_at: string;
-};
-
-export type SupportMessage = {
-  id: string;
-  thread_id: string;
-  author_id: string | null;
-  body: string;
-  attachment_path: string | null;
-  created_at: string;
-};
-
-type Table<Row, Insert = Row, Update = Partial<Row>> = {
-  Row: Row;
-  Insert: Insert;
-  Update: Update;
-  Relationships: [];
-};
-
-export type Database = {
-  public: {
-    Tables: {
-      profiles: Table<
-        Profile,
-        { id: string; pseudo: string; birth_date: string; avatar_url?: string | null },
-        Partial<Pick<Profile, 'pseudo' | 'avatar_url' | 'visibility'>>
-      >;
-      sports: Table<Sport, never, never>;
-      custom_sports: Table<CustomSport, { name: string; family: SportFamily; owner_id: string }>;
-      favorite_sports: Table<
-        FavoriteSport,
-        { user_id: string; sport_id?: number | null; custom_sport_id?: string | null }
-      >;
-      establishments: Table<Establishment, { name: string; city?: string | null }>;
-      staff_roles: Table<StaffRoleRow, never, never>;
-      invite_codes: Table<InviteCode, never, never>;
-      rungen_memberships: Table<RungenMembership, never, never>;
-      support_threads: Table<
-        SupportThread,
-        { user_id: string; category: SupportCategory; subject: string },
-        { status: SupportStatus }
-      >;
-      support_messages: Table<
-        SupportMessage,
-        { thread_id: string; author_id: string; body: string; attachment_path?: string | null },
-        never
-      >;
-    };
-    Views: {
-      public_profiles: {
-        Row: { id: string; pseudo: string; avatar_url: string | null };
-        Relationships: [];
-      };
-    };
-    Functions: {
-      check_invite_code: { Args: { p_code: string }; Returns: InviteCheck };
-      create_rungen_profile: {
-        Args: {
-          p_code: string;
-          p_pseudo: string;
-          p_birth_date: string;
-          p_child_consent: boolean;
-        };
-        Returns: undefined;
-      };
-      create_staff_profile: {
-        Args: { p_code: string; p_pseudo: string; p_birth_date: string };
-        Returns: undefined;
-      };
-      generate_invite_codes: {
-        Args: {
-          p_establishment: string;
-          p_class_label: string | null;
-          p_count: number;
-          p_kind?: InviteKind;
-        };
-        Returns: { code: string }[];
-      };
-      activate_invite_code: { Args: { p_code_id: string }; Returns: undefined };
-      deactivate_invite_code: { Args: { p_code_id: string }; Returns: undefined };
-      admin_set_account_disabled: { Args: { p_user: string; p_disabled: boolean }; Returns: undefined };
-      admin_delete_account: { Args: { p_user: string }; Returns: undefined };
-      delete_my_account: { Args: Record<string, never>; Returns: undefined };
-      find_account_by_code: {
-        Args: { p_code: string };
-        Returns: {
-          user_id: string;
-          pseudo: string;
-          space: Space;
-          disabled_at: string | null;
-          establishment_name: string;
-          class_label: string | null;
-          code_status: InviteStatus;
-        }[];
-      };
-    };
-    Enums: {
-      visibility: Visibility;
-      space: Space;
-      sport_family: SportFamily;
-      pace_unit: PaceUnit;
-      staff_role: StaffRole;
-      invite_kind: InviteKind;
-      invite_status: InviteStatus;
-      support_category: SupportCategory;
-      support_status: SupportStatus;
-    };
-    CompositeTypes: Record<string, never>;
-  };
 };

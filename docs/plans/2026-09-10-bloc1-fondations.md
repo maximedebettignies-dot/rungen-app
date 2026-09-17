@@ -72,13 +72,23 @@ Spec de référence : `docs/specs/2026-09-10-bloc1-fondations-design.md`
 - [x] Projet Supabase créé (`rungen`, West EU / Irlande — conforme à l'exigence région UE)
 - [x] CLI Supabase ajouté au dépôt + `supabase/config.toml` (TOTP activé, providers Google et Apple déclarés, secrets par variables d'environnement)
 - [x] Préflight `npm run db:preflight` : rejoue les migrations dans les conditions d'un vrai projet (rôle non superutilisateur, `storage.objects` à `supabase_storage_admin`, `auth.users` à `supabase_auth_admin`). Les 4 migrations passent
-- [ ] `npm run db:link` puis `npm run db:push` pour appliquer les 4 migrations
-- [ ] **Vérifier que la MFA (TOTP) est disponible sur le plan Free** : le modèle de `config.toml` la annonce comme réservée au plan Pro. Sans elle, `aal2` est inatteignable et l'onglet admin reste verrouillé — c'est bloquant pour la tâche 11
-- [ ] Authentication > Multi-Factor : activer TOTP
+- [x] Les 5 migrations appliquées au projet `rungen` (`bnfobyzpoeqabseupien`), historique aligné sur les noms de fichiers du dépôt
+- [x] **MFA (TOTP) disponible en plan Free** : la doc Supabase est explicite — « TOTP MFA API is free to use and is enabled on all Supabase projects by default ». Seul le MFA *Phone* est un module payant. Le commentaire « Pro plan » du modèle de `config.toml` ne concerne pas TOTP. L'onglet admin n'est donc pas bloqué
+- [x] `npm run types:gen` : types générés depuis la base dans `database.generated.ts`, alias de l'app dérivés dans `database.ts`
+- [ ] Authentication > Multi-Factor : vérifier que TOTP est bien activé côté tableau de bord
 - [ ] SQL Editor : créer ton compte admin après ta première connexion dans l'app —
   `insert into public.staff_roles (user_id, role) values ('<ton id utilisateur>', 'admin');`
 - [ ] Créer `.env` à partir de `.env.example` (`.env` est déjà dans `.gitignore`)
-- [ ] `npm run types:gen` pour remplacer les types écrits à la main
+
+**Avis de sécurité du projet**, passés en revue après application :
+
+| Avis | Décision |
+|---|---|
+| 9 fonctions `SECURITY DEFINER` appelables par `anon` | **Corrigé** (migration `20260917000000`) : seule `check_invite_code` reste ouverte, la vérification d'un code précédant la connexion. L'avis avait relevé un vrai oubli — le `revoke ... from public` sur `find_account_by_code` ne retirait pas le droit accordé directement à `anon` |
+| Fonctions de trigger exposées en `/rest/v1/rpc/` | **Corrigé** : droit d'exécution retiré ; un test vérifie que les triggers s'appliquent toujours |
+| `public.banned_words` : RLS sans policy | **Voulu** : la liste ne doit être lisible par personne via l'API |
+| `public_profiles` : vue `SECURITY DEFINER` | **Voulu et nécessaire** : la vue doit contourner la RLS de `profiles` (limitée à sa propre ligne) pour exposer la carte des autres. Le filtrage est dans la vue, et la règle critique « le public ne voit jamais un membre RUNGEN » est couverte par les tests |
+| 15 fonctions `SECURITY DEFINER` appelables par `authenticated` | **Voulu** : l'app les appelle, et les policies RLS s'évaluent avec les droits de l'utilisateur courant — leur retirer ce droit casserait la RLS. Chaque fonction admin vérifie `is_admin()` en interne |
 - [x] `src/lib/supabase.ts` : client avec stockage de session via `expo-secure-store`, `autoRefreshToken: true`, `detectSessionInUrl: false`. La session est découpée en tranches de 1800 octets, SecureStore plafonnant chaque valeur à 2 Ko
 - [x] `src/lib/database.ts` : types de la base écrits à la main, à régénérer avec `npx supabase gen types typescript` une fois le projet créé
 
