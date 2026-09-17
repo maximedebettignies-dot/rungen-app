@@ -38,6 +38,7 @@
   "devDependencies": {
     "@types/node": "^22.20.3",
     "@types/react": "~19.2.2",
+    "supabase": "^2.117.0",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -48,7 +49,12 @@
     "lint": "expo lint",
     "test:db": "bash supabase/tests/run.sh",
     "typecheck": "tsc --noEmit",
-    "test:unit": "node --experimental-strip-types --test src/lib/*.test.ts"
+    "test:unit": "node --experimental-strip-types --test src/lib/*.test.ts",
+    "db:link": "supabase link",
+    "db:push": "supabase db push",
+    "db:diff": "supabase db diff --linked",
+    "types:gen": "supabase gen types typescript --linked > src/lib/database.generated.ts",
+    "db:preflight": "bash supabase/preflight/run.sh"
   },
   "private": true
 }

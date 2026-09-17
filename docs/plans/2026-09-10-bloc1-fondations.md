@@ -69,12 +69,16 @@ Spec de référence : `docs/specs/2026-09-10-bloc1-fondations-design.md`
 
 ### Tâche 4 : projet Supabase et client
 
-- [ ] Créer le projet Supabase (région UE), récupérer l'URL et la clé `anon`
-- [ ] `npx supabase link` puis `npx supabase db push` pour appliquer les deux migrations
+- [x] Projet Supabase créé (`rungen`, West EU / Irlande — conforme à l'exigence région UE)
+- [x] CLI Supabase ajouté au dépôt + `supabase/config.toml` (TOTP activé, providers Google et Apple déclarés, secrets par variables d'environnement)
+- [x] Préflight `npm run db:preflight` : rejoue les migrations dans les conditions d'un vrai projet (rôle non superutilisateur, `storage.objects` à `supabase_storage_admin`, `auth.users` à `supabase_auth_admin`). Les 4 migrations passent
+- [ ] `npm run db:link` puis `npm run db:push` pour appliquer les 4 migrations
+- [ ] **Vérifier que la MFA (TOTP) est disponible sur le plan Free** : le modèle de `config.toml` la annonce comme réservée au plan Pro. Sans elle, `aal2` est inatteignable et l'onglet admin reste verrouillé — c'est bloquant pour la tâche 11
 - [ ] Authentication > Multi-Factor : activer TOTP
 - [ ] SQL Editor : créer ton compte admin après ta première connexion dans l'app —
   `insert into public.staff_roles (user_id, role) values ('<ton id utilisateur>', 'admin');`
 - [ ] Créer `.env` à partir de `.env.example` (`.env` est déjà dans `.gitignore`)
+- [ ] `npm run types:gen` pour remplacer les types écrits à la main
 - [x] `src/lib/supabase.ts` : client avec stockage de session via `expo-secure-store`, `autoRefreshToken: true`, `detectSessionInUrl: false`. La session est découpée en tranches de 1800 octets, SecureStore plafonnant chaque valeur à 2 Ko
 - [x] `src/lib/database.ts` : types de la base écrits à la main, à régénérer avec `npx supabase gen types typescript` une fois le projet créé
 
