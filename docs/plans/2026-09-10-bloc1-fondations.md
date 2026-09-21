@@ -94,6 +94,10 @@ Spec de référence : `docs/specs/2026-09-10-bloc1-fondations-design.md`
 
 ### Tâche 5 : connexion Google et Apple
 
+**Marche à suivre détaillée : `docs/plans/2026-09-21-connexion-google-apple.md`**
+(`eas.json` est prêt, `skip_nonce_check` est activé côté Supabase)
+
+
 - [ ] Google Cloud : projet + 3 identifiants OAuth (Web, Android avec l'empreinte SHA-1 du build EAS, iOS)
 - [ ] Supabase > Authentication > Providers : activer Google (ID client Web + secret) et Apple (identifiant `fr.rungen.app`)
 - [x] `src/lib/auth.ts` : `signInWithGoogle()` et `signInWithApple()` → jeton natif → `supabase.auth.signInWithIdToken`

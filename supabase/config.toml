@@ -340,7 +340,10 @@ email_optional = false
 enabled = true
 client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
-skip_nonce_check = false
+# Obligatoire pour la connexion native : le jeton renvoyé par l'écran système
+# d'iOS ne porte pas de nonce que Supabase puisse vérifier. Sans cette option,
+# `signInWithIdToken` échoue sur iPhone.
+skip_nonce_check = true
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
 # You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
