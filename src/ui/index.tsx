@@ -32,8 +32,19 @@ export function Titre({ children }: { children: React.ReactNode }) {
   return <Text style={styles.titre}>{children}</Text>;
 }
 
-export function SousTitre({ children }: { children: React.ReactNode }) {
-  return <Text style={styles.sousTitre}>{children}</Text>;
+export function SousTitre({
+  children,
+  selectionnable,
+}: {
+  children: React.ReactNode;
+  /** Autorise la sélection tactile, pour un contenu que l'on veut copier. */
+  selectionnable?: boolean;
+}) {
+  return (
+    <Text style={styles.sousTitre} selectable={selectionnable}>
+      {children}
+    </Text>
+  );
 }
 
 export function Paragraphe({ children }: { children: React.ReactNode }) {

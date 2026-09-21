@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Linking, View } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { messageErreur } from '@/lib/errors';
 import { prochaineEtapeMfa } from '@/lib/mfa';
@@ -78,6 +78,24 @@ export function DoubleAuth({ children }: { children: React.ReactNode }) {
     evaluer();
   }, [evaluer]);
 
+  /**
+   * Passe l'URI `otpauth://` au système, qui la remet à l'application
+   * d'authentification avec le compte déjà rempli. C'est le chemin normal quand
+   * l'enrôlement se fait depuis le téléphone lui-même : on ne peut pas y scanner
+   * un QR code affiché sur ce même écran.
+   */
+  async function ouvrirApplication(uri: string) {
+    setErreur(null);
+    try {
+      await Linking.openURL(uri);
+    } catch {
+      setErreur(
+        "Aucune application d'authentification n'a répondu. Installe Google Authenticator " +
+          'ou Authy, puis réessaie — ou ajoute le compte à la main avec la clé ci-dessous.',
+      );
+    }
+  }
+
   async function valider(facteur: string) {
     setErreur(null);
     setEnCours(true);
@@ -102,15 +120,28 @@ export function DoubleAuth({ children }: { children: React.ReactNode }) {
       {etape.nom === 'enrolement' ? (
         <>
           <SousTitre>
-            Scanne ce QR code avec une application d&apos;authentification (Google Authenticator, Authy,
-            1Password…), puis saisis le code à 6 chiffres qu&apos;elle affiche.
+            Il te faut une application d&apos;authentification (Google Authenticator, Authy,
+            1Password…). Ajoute RUNGEN dedans, puis saisis le code à 6 chiffres qu&apos;elle affiche.
           </SousTitre>
-          <View style={{ alignItems: 'center', gap: espace.sm }}>
-            <QrCode valeur={etape.uri} />
-          </View>
+
+          <Bouton
+            titre="Ouvrir mon application d'authentification"
+            onPress={() => ouvrirApplication(etape.uri)}
+          />
+
           <Carte>
-            <Paragraphe>Impossible de scanner ?</Paragraphe>
-            <SousTitre>Saisis cette clé à la main : {etape.secret}</SousTitre>
+            <Paragraphe>Tu configures depuis un autre appareil ?</Paragraphe>
+            <SousTitre>Scanne ce QR code avec lui.</SousTitre>
+            <View style={{ alignItems: 'center', paddingTop: espace.sm }}>
+              <QrCode valeur={etape.uri} />
+            </View>
+          </Carte>
+
+          <Carte>
+            <Paragraphe>Rien de tout ça ne marche ?</Paragraphe>
+            <SousTitre selectionnable>
+              Ajoute un compte à la main avec cette clé : {etape.secret}
+            </SousTitre>
           </Carte>
         </>
       ) : (
