@@ -117,13 +117,14 @@ par le schéma inversé de l'étape 3c.
 
 **Le build EAS n'emporte pas ton `.env`** : il est ignoré par git, donc absent de ce
 qu'EAS reçoit. Sans ces variables déclarées côté EAS, l'app buildée plante au démarrage.
-Déclare-les une fois :
+Déclare-les une fois (ajoute `--visibility plaintext` : ces valeurs sont publiques par
+conception, et EAS les demande sinon) :
 
 ```bash
-eas env:create --environment development --name EXPO_PUBLIC_SUPABASE_URL --value "https://bnfobyzpoeqabseupien.supabase.co"
-eas env:create --environment development --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "…"
-eas env:create --environment development --name EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID --value "…"
-eas env:create --environment development --name EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID --value "…"
+eas env:set --environment development --name EXPO_PUBLIC_SUPABASE_URL --value "https://bnfobyzpoeqabseupien.supabase.co"
+eas env:set --environment development --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value "…"
+eas env:set --environment development --name EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID --value "…"
+eas env:set --environment development --name EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID --value "…"
 ```
 
 ---
