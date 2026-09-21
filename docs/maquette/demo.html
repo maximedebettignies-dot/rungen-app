@@ -104,6 +104,7 @@
     flex: none; display: flex; align-items: center; gap: 10px;
     padding: 6px 15px 10px; min-height: 34px;
   }
+  .nav:empty { display: none; }
   .nav button {
     background: none; border: none; color: var(--app-accent);
     font: inherit; font-size: 0.82rem; cursor: pointer; padding: 2px 0;
@@ -239,6 +240,59 @@
            border-radius: 6px; cursor: pointer; }
   .reset:hover { border-color: var(--accent); color: var(--accent); }
 
+  /* Bandeau des écrans non encore construits */
+  .wip {
+    flex: none; display: flex; align-items: center; gap: 8px;
+    background: #2A2113; border-bottom: 1px solid #4A3A1C;
+    color: var(--app-warn); font-size: 0.68rem; font-weight: 600;
+    padding: 6px 18px; letter-spacing: 0.02em;
+  }
+  .wip em { font-style: normal; opacity: 0.85; font-weight: 400; }
+
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tile { background: var(--app-card); border: 1px solid var(--app-line);
+          border-radius: 12px; padding: 11px; display: flex; flex-direction: column; gap: 1px; }
+  .tile b { font-family: var(--display); font-size: 1.65rem; line-height: 1;
+            font-weight: 700; font-variant-numeric: tabular-nums; }
+  .tile small { color: var(--app-soft); font-size: 0.66rem; }
+
+  .act {
+    width: 100%; text-align: left; background: var(--app-card); border: 1px solid var(--app-line);
+    border-radius: 12px; padding: 11px; font: inherit; color: var(--app-text);
+    display: grid; grid-template-columns: 34px 1fr auto; gap: 11px; align-items: center; cursor: pointer;
+  }
+  .act .ic { width: 34px; height: 34px; border-radius: 10px; background: #1F2937;
+             display: grid; place-items: center; font-size: 1rem; }
+  .act b { font-weight: 600; font-size: 0.85rem; display: block; }
+  .act small { color: var(--app-soft); font-size: 0.7rem; }
+  .act .val { font-family: var(--display); font-size: 1.15rem; font-weight: 700;
+              font-variant-numeric: tabular-nums; }
+
+  .chart { width: 100%; height: auto; display: block; }
+  .legendless { color: var(--app-soft); font-size: 0.68rem; line-height: 1.4; }
+
+  .rank { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center;
+          padding: 8px 0; border-bottom: 1px solid var(--app-line); font-size: 0.82rem; }
+  .rank:last-child { border-bottom: none; }
+  .rank .pos { color: var(--app-soft); font-variant-numeric: tabular-nums; font-size: 0.75rem; }
+  .rank .km { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .rank.me { color: var(--app-accent); }
+  .rank.anon { color: var(--app-soft); font-style: italic; }
+
+  .share {
+    border-radius: 14px; padding: 16px; color: #fff;
+    background: linear-gradient(150deg, #1B4C86 0%, #208AEF 55%, #3FB6C9 100%);
+    display: flex; flex-direction: column; gap: 9px;
+  }
+  .share .big { font-family: var(--display); font-size: 2.5rem; line-height: 0.9;
+                font-weight: 700; font-variant-numeric: tabular-nums; }
+  .share .row3 { display: flex; gap: 16px; }
+  .share .row3 div { display: flex; flex-direction: column; }
+  .share .row3 b { font-size: 1rem; font-variant-numeric: tabular-nums; }
+  .share .row3 small { font-size: 0.62rem; opacity: 0.85; }
+  .share .mark { font-family: var(--display); letter-spacing: 0.12em;
+                 font-size: 0.72rem; opacity: 0.9; text-transform: uppercase; }
+
   @media (prefers-reduced-motion: no-preference) {
     .screen > * { animation: rise 0.16s ease-out both; }
   }
@@ -264,6 +318,7 @@
       <div class="phone">
         <div class="notch"><i></i></div>
         <div class="nav" id="nav"></div>
+        <div class="wip" id="wip" hidden></div>
         <div class="screen" id="screen"></div>
         <div class="tabs" id="tabs" hidden></div>
       </div>
@@ -378,7 +433,16 @@
       filtreCode: "tous",
       lot: { classe: "", nombre: "25" },
       rechercheCompte: "",
-      compteTrouve: null
+      compteTrouve: null,
+
+      /* Blocs 2 à 6 : contenu d'exemple, clairement signalé à l'écran. */
+      activites: [
+        { id: 1, sport: "Course à pied", ic: "\u25B6", quand: "Hier, 18 h 20", val: "8,2 km", detail: "42:10 · 5:08 /km" },
+        { id: 2, sport: "Natation", ic: "\u2248", quand: "Samedi, 10 h 05", val: "1,2 km", detail: "38:00 · 3:10 /100 m" },
+        { id: 3, sport: "Handball", ic: "\u25CF", quand: "Jeudi, 17 h 30", val: "1 h 30", detail: "Entraînement club" }
+      ],
+      saisie: { sport: "Course à pied", distance: "", duree: "", ressenti: null },
+      saisieOk: false
     };
   }
 
@@ -545,24 +609,232 @@
   };
 
   // --- Application connectée ----------------------------------------------
+  // --- Blocs 2 à 6 : la V1 telle qu'elle est prévue ------------------------
+  var SEMAINE = [
+    { j: "L", km: 0 }, { j: "M", km: 8.2 }, { j: "M", km: 0 }, { j: "J", km: 5.4 },
+    { j: "V", km: 0 }, { j: "S", km: 14.1 }, { j: "D", km: 6.1 }
+  ];
+  var FORME = [38, 41, 44, 42, 48, 53];
+
+  /* Volume de la semaine. Une seule série : pas de légende, le titre la nomme.
+     Étiquette directe sur le jour le plus fort plutôt qu'un survol, l'écran
+     étant tactile et large de 284 px. */
+  function graphSemaine() {
+    var W = 284, H = 126, bas = 96, hautMax = 74;
+    var max = Math.max.apply(null, SEMAINE.map(function (d) { return d.km; }));
+    var gap = 7, bw = (W - gap * (SEMAINE.length - 1)) / SEMAINE.length;
+    var fort = SEMAINE.reduce(function (a, b) { return b.km > a.km ? b : a; });
+
+    var barres = SEMAINE.map(function (d, i) {
+      var x = i * (bw + gap);
+      var h = d.km === 0 ? 3 : Math.max(6, (d.km / max) * hautMax);
+      var y = bas - h;
+      var plein = d.km > 0;
+      return '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) +
+        '" height="' + h.toFixed(1) + '" rx="4" fill="' + (plein ? "#208AEF" : "#2A313D") + '"/>' +
+        '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (bas + 15) +
+        '" text-anchor="middle" font-size="10" fill="#9AA6B8">' + d.j + "</text>" +
+        (d === fort
+          ? '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 6).toFixed(1) +
+            '" text-anchor="middle" font-size="10" font-weight="600" fill="#F2F5F9">' +
+            String(d.km).replace(".", ",") + "</text>"
+          : "");
+    }).join("");
+
+    return '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" role="img" ' +
+      'aria-label="Volume par jour cette semaine, maximum ' + String(fort.km).replace(".", ",") + ' kilomètres samedi">' +
+      '<line x1="0" y1="' + bas + '" x2="' + W + '" y2="' + bas + '" stroke="#2A313D" stroke-width="1"/>' +
+      barres + "</svg>";
+  }
+
+  /* Courbe de forme sur six semaines, point final mis en avant. */
+  function graphForme() {
+    var W = 284, H = 84, pad = 8;
+    var max = Math.max.apply(null, FORME), min = Math.min.apply(null, FORME);
+    var pas = (W - pad * 2) / (FORME.length - 1);
+    // Le tracé commence à 22 px du haut : l'étiquette du dernier point tient
+    // au-dessus de lui sans sortir du viewBox.
+    var haut = 22, bas = H - 12;
+    var pts = FORME.map(function (v, i) {
+      var x = pad + i * pas;
+      var y = haut + (1 - (v - min) / (max - min || 1)) * (bas - haut);
+      return [x, y];
+    });
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+    var last = pts[pts.length - 1];
+
+    return '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" role="img" ' +
+      'aria-label="Courbe de forme sur six semaines, en progression">' +
+      '<path d="' + d + '" fill="none" stroke="#30A46C" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) +
+      '" r="5" fill="#30A46C" stroke="#181D26" stroke-width="2"/>' +
+      '<text x="' + (last[0] - 4).toFixed(1) + '" y="' + (last[1] - 11).toFixed(1) +
+      '" text-anchor="end" font-size="10" font-weight="600" fill="#F2F5F9">53</text>' +
+      "</svg>";
+  }
+
   ECRANS.accueil = function () {
     return {
+      wip: "Blocs 2 et 3 · pas encore construits",
       html:
         '<p class="t">Salut ' + ech(s.pseudo || "coureur_du_21") + "</p>" +
         '<p class="sub">' + (s.parcours === "rungen" ? "Tu es dans l'espace RUNGEN." : "Tu es dans l'espace public.") + "</p>" +
+        '<div class="tiles">' +
+          '<div class="tile"><b>33,8</b><small>km cette semaine</small></div>' +
+          '<div class="tile"><b>4</b><small>séances</small></div>' +
+        '</div>' +
         '<div class="card">' +
-          "<p style=\"font-weight:600\">Le log d'activité arrive au bloc 2.</p>" +
-          '<p class="sub">En attendant, ajuste tes sports favoris : ce sont eux qui apparaîtront quand tu logueras une séance.</p>' +
+          '<p class="lbl">Cette semaine</p>' + graphSemaine() +
         '</div>' +
-        '<p class="lbl">Mes sports</p>' +
+        '<div class="card">' +
+          '<p class="lbl">Ta forme, sur 6 semaines</p>' + graphForme() +
+          '<p class="legendless">En progression. Sur ce rythme, tu tiendrais un 10 km en <b style="color:var(--app-text)">52:30</b>.</p>' +
+        '</div>' +
+        '<p class="lbl">Dernières séances</p>' +
+        s.activites.map(function (a) {
+          return '<button class="act" data-act="voir-partage">' +
+            '<span class="ic">' + a.ic + "</span>" +
+            "<span><b>" + ech(a.sport) + "</b><small>" + ech(a.quand) + "</small></span>" +
+            '<span class="val">' + ech(a.val) + "</span></button>";
+        }).join("")
+    };
+  };
+
+  ECRANS.activite = function () {
+    if (s.saisieOk) {
+      return {
+        wip: "Bloc 2 · pas encore construit",
+        html:
+          '<div class="spacer"></div>' +
+          '<div class="ok-box">Séance enregistrée. Elle apparaît dans ton historique et compte dans tes stats.</div>' +
+          '<button class="btn" data-act="voir-partage">Partager cette séance</button>' +
+          '<button class="btn ghost" data-act="nouvelle-saisie">Loguer une autre séance</button>' +
+          '<div class="spacer"></div>'
+      };
+    }
+    var ressentis = ["Facile", "Correct", "Dur"];
+    return {
+      wip: "Bloc 2 · pas encore construit",
+      html:
+        '<p class="t">Loguer une séance</p>' +
+        '<p class="sub">Saisie manuelle. Le suivi GPS et l&rsquo;import de fichiers GPX viendront en V1.1.</p>' +
+        '<p class="lbl">Sport</p>' +
         '<div class="chips">' +
-          s.favoris.map(function (n) { return '<span class="chip" aria-pressed="true">' + ech(n) + "</span>"; }).join("") +
+          s.favoris.map(function (n) {
+            return '<button class="chip" aria-pressed="' + (s.saisie.sport === n) + '" data-sp-saisie="' + ech(n) + '">' + ech(n) + "</button>";
+          }).join("") +
         '</div>' +
-        (s.parcours === "rungen"
-          ? '<div class="card"><p class="lbl">Mon établissement</p><p style="font-size:0.84rem">' +
-            ech(s.codeInfo ? s.codeInfo.etab : "Collège Jean Moulin") + " · " +
-            ech(s.codeInfo ? s.codeInfo.classe : "4e B") + "</p></div>"
-          : "")
+        erreurHtml() +
+        '<div class="row">' +
+          '<div class="grow"><p class="lbl">Distance (km)</p><input class="fld" id="f-dist" inputmode="decimal" placeholder="8,2" value="' + ech(s.saisie.distance) + '"></div>' +
+          '<div class="grow"><p class="lbl">Durée (min)</p><input class="fld" id="f-duree" inputmode="numeric" placeholder="42" value="' + ech(s.saisie.duree) + '"></div>' +
+        '</div>' +
+        '<p class="lbl">Ressenti</p>' +
+        '<div class="chips">' +
+          ressentis.map(function (r) {
+            return '<button class="chip" aria-pressed="' + (s.saisie.ressenti === r) + '" data-ressenti="' + r + '">' + r + "</button>";
+          }).join("") +
+        '</div>' +
+        '<button class="btn" data-act="enregistrer-seance">Enregistrer</button>' +
+        '<button class="btn ghost" data-act="voir-historique">Voir mon historique</button>'
+    };
+  };
+
+  ECRANS.historique = function () {
+    return {
+      wip: "Bloc 2 · pas encore construit", titre: "Historique", retourAct: "retour-activite",
+      html:
+        '<p class="t">Mon historique</p>' +
+        '<div class="tiles">' +
+          '<div class="tile"><b>142</b><small>km ce mois</small></div>' +
+          '<div class="tile"><b>18</b><small>séances</small></div>' +
+        '</div>' +
+        s.activites.map(function (a) {
+          return '<div class="act">' +
+            '<span class="ic">' + a.ic + "</span>" +
+            "<span><b>" + ech(a.sport) + "</b><small>" + ech(a.detail) + "</small></span>" +
+            '<span class="val">' + ech(a.val) + "</span></div>";
+        }).join("") +
+        '<p class="sub" style="font-size:0.72rem">Chaque séance garde son sport, sa distance ou sa durée, et ton ressenti. Aucune donnée de santé n&rsquo;est enregistrée.</p>'
+    };
+  };
+
+  ECRANS.defis = function () {
+    var rangs = [
+      { p: 1, n: "chloe_running", km: "41,2", moi: false },
+      { p: 2, n: ech(s.pseudo || "coureur_du_21"), km: "33,8", moi: true },
+      { p: 3, n: "tom_du_95", km: "29,0", moi: false }
+    ];
+    var publics = [
+      { p: 1, n: "marathonien_fr", km: "88,4" },
+      { p: 2, n: "Athlète RUNGEN", km: "41,2", anon: true },
+      { p: 3, n: "trailteam_idf", km: "37,9" }
+    ];
+    return {
+      wip: "Blocs 4 et 5 · pas encore construits",
+      html:
+        '<p class="t">Défis</p>' +
+        '<div class="card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
+            '<b style="font-size:0.9rem">Défi de la classe · 4e B</b><span class="tag live">En cours</span></div>' +
+          '<p class="sub">Le plus de kilomètres cumulés en février. Se termine dans 9 jours.</p>' +
+          rangs.map(function (r) {
+            return '<div class="rank' + (r.moi ? " me" : "") + '"><span class="pos">' + r.p + "</span>" +
+              "<span>" + r.n + '</span><span class="km">' + r.km + " km</span></div>";
+          }).join("") +
+        '</div>' +
+        '<div class="card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
+            '<b style="font-size:0.9rem">Challenge national</b><span class="tag used">Partenaire</span></div>' +
+          '<p class="sub">Classement ouvert à tous les membres de l&rsquo;application.</p>' +
+          publics.map(function (r) {
+            return '<div class="rank' + (r.anon ? " anon" : "") + '"><span class="pos">' + r.p + "</span>" +
+              "<span>" + r.n + '</span><span class="km">' + r.km + " km</span></div>";
+          }).join("") +
+          '<p class="legendless">Dans un classement public, un jeune RUNGEN apparaît en « Athlète RUNGEN » : pas de pseudo, pas de profil cliquable, aucune interaction possible avec le grand public.</p>' +
+        '</div>' +
+        '<p class="sub" style="font-size:0.72rem">Les catégories alcool, jeux d&rsquo;argent, boissons énergisantes et malbouffe sont exclues des challenges visibles par les jeunes. La mention « Partenaire » est toujours affichée.</p>'
+    };
+  };
+
+  ECRANS.partage = function () {
+    return {
+      wip: "Bloc 6 · pas encore construit", titre: "Partage", retourAct: "retour-accueil",
+      html:
+        '<p class="t">Partager ta séance</p>' +
+        '<div class="share">' +
+          '<span class="mark">RUNGEN</span>' +
+          '<span class="big">8,2 km</span>' +
+          '<div class="row3">' +
+            "<div><b>42:10</b><small>DURÉE</small></div>" +
+            "<div><b>5:08</b><small>ALLURE /KM</small></div>" +
+            "<div><b>Hier</b><small>18 H 20</small></div>" +
+          '</div>' +
+        '</div>' +
+        '<button class="btn">Enregistrer l&rsquo;image</button>' +
+        '<button class="btn ghost">Partager…</button>' +
+        '<p class="sub" style="font-size:0.72rem">L&rsquo;image ne porte ni ton vrai nom, ni ton établissement, ni aucun tracé de parcours.</p>'
+    };
+  };
+
+  ECRANS.profil = function () {
+    var entrees = [
+      ["reglages", "Réglages", "Photo, visibilité et suppression de compte.", true],
+      ["support", "Support", "Écrire à l'association et suivre tes conversations.", true],
+      ["admin", "Encadrement", "Établissements, codes et comptes. Double authentification requise.", true]
+    ];
+    return {
+      html:
+        '<p class="t">' + ech(s.pseudo || "coureur_du_21") + "</p>" +
+        '<div class="avatar">' + ech((s.pseudo || "C").charAt(0).toUpperCase()) + "</div>" +
+        '<div class="tiles">' +
+          '<div class="tile"><b>' + s.favoris.length + "</b><small>sports favoris</small></div>" +
+          '<div class="tile"><b>18</b><small>séances ce mois</small></div>' +
+        '</div>' +
+        entrees.map(function (e) {
+          return '<button class="opt" data-onglet-go="' + e[0] + '"><b>' + ech(e[1]) + "</b><small>" + ech(e[2]) + "</small></button>";
+        }).join("")
     };
   };
 
@@ -834,12 +1106,20 @@
 
   var TABS = [
     { id: "accueil", t: "Accueil", i: "●" },
-    { id: "support", t: "Support", i: "✉" },
-    { id: "admin", t: "Admin", i: "★" },
-    { id: "reglages", t: "Réglages", i: "⚙" }
+    { id: "activite", t: "Activité", i: "＋" },
+    { id: "defis", t: "Défis", i: "◆" },
+    { id: "profil", t: "Profil", i: "○" }
   ];
 
-  var DANS_APP = { accueil: 1, support: 1, reglages: 1, admin: 1, "support-nouveau": 1 };
+  /* Onglet mis en avant selon l'écran courant. */
+  var RACINE = {
+    accueil: "accueil", stats: "accueil", partage: "accueil",
+    activite: "activite", historique: "activite",
+    defis: "defis",
+    profil: "profil", reglages: "profil", support: "profil",
+    "support-nouveau": "profil", admin: "profil"
+  };
+  var DANS_APP = RACINE;
 
   // --- Rendu ---------------------------------------------------------------
   function rendre() {
@@ -847,6 +1127,14 @@
     var vue = (ECRANS[nom] || ECRANS.bienvenue)();
 
     document.getElementById("screen").innerHTML = vue.html;
+
+    var wip = document.getElementById("wip");
+    if (vue.wip) {
+      wip.hidden = false;
+      wip.innerHTML = "&#9888; <span>Aperçu</span> <em>" + ech(vue.wip) + "</em>";
+    } else {
+      wip.hidden = true;
+    }
 
     var nav = document.getElementById("nav");
     if (vue.retour) {
@@ -864,8 +1152,7 @@
     tabs.hidden = !dansApp;
     if (dansApp) {
       tabs.innerHTML = TABS.map(function (t) {
-        var courant = (nom === t.id) || (nom === "support-nouveau" && t.id === "support");
-        return '<button type="button" data-onglet="' + t.id + '" aria-current="' + courant + '">' +
+        return '<button type="button" data-onglet="' + t.id + '" aria-current="' + (RACINE[nom] === t.id) + '">' +
           "<em>" + t.i + "</em>" + t.t + "</button>";
       }).join("");
     }
@@ -928,10 +1215,11 @@
       aller("sports");
     },
 
-    terminer: function () { s.onglet = "accueil"; aller("accueil"); },
+    terminer: function () { aller("accueil"); },
 
     "nouveau-fil": function () { aller("support-nouveau"); },
     "fermer-nouveau": function () { aller("support"); },
+    "retour-profil": function () { aller("profil"); },
     "fermer-fil": function () { s.filOuvert = null; s.brouillon = ""; aller("support"); },
 
     "envoyer-fil": function () {
@@ -953,6 +1241,27 @@
       var f = s.fils.filter(function (x) { return x.id === s.filOuvert; })[0];
       f.messages.push({ moi: true, texte: v, quand: "à l'instant" });
       s.brouillon = "";
+      rendre();
+    },
+
+    "voir-partage": function () { aller("partage"); },
+    "retour-accueil": function () { aller("accueil"); },
+    "voir-historique": function () { aller("historique"); },
+    "retour-activite": function () { aller("activite"); },
+    "nouvelle-saisie": function () {
+      s.saisieOk = false;
+      s.saisie = { sport: s.favoris[0] || "Course à pied", distance: "", duree: "", ressenti: null };
+      aller("activite");
+    },
+    "enregistrer-seance": function () {
+      s.saisie.distance = champ("f-dist");
+      s.saisie.duree = champ("f-duree");
+      if (!s.saisie.distance && !s.saisie.duree) {
+        s.erreur = "Indique au moins une distance ou une durée.";
+        return rendre();
+      }
+      s.saisieOk = true;
+      s.erreur = null;
       rendre();
     },
 
@@ -1012,7 +1321,7 @@
 
   // --- Délégation ----------------------------------------------------------
   document.getElementById("screen").addEventListener("click", function (ev) {
-    var el = ev.target.closest("[data-go],[data-act],[data-sport],[data-vis],[data-onglet],[data-fil],[data-cat],[data-admin],[data-filtre],[data-recu],[data-off],[data-statut]");
+    var el = ev.target.closest("[data-go],[data-act],[data-sport],[data-vis],[data-onglet],[data-onglet-go],[data-sp-saisie],[data-ressenti],[data-fil],[data-cat],[data-admin],[data-filtre],[data-recu],[data-off],[data-statut]");
     if (!el) return;
 
     if (el.dataset.go) {
@@ -1026,6 +1335,9 @@
       if (i === -1) s.favoris.push(n); else s.favoris.splice(i, 1);
       return rendre();
     }
+    if (el.dataset.spSaisie) { s.saisie.sport = el.dataset.spSaisie; return rendre(); }
+    if (el.dataset.ressenti) { s.saisie.ressenti = el.dataset.ressenti; return rendre(); }
+    if (el.dataset.ongletGo) { s.adminSection = null; return aller(el.dataset.ongletGo); }
     if (el.dataset.vis) { s.visibilite = el.dataset.vis; return rendre(); }
     if (el.dataset.fil) { s.filOuvert = +el.dataset.fil; return rendre(); }
     if (el.dataset.cat) { s.nouveauFil.cat = el.dataset.cat; return rendre(); }
@@ -1062,9 +1374,37 @@
   });
 
   // --- Scénarios -----------------------------------------------------------
+  function connecte(extra) {
+    s = etatInitial();
+    s.parcours = "rungen";
+    s.pseudo = "coureur_du_95";
+    s.dateNaissance = new Date(2012, 3, 1);
+    s.mineur = true;
+    s.visibilite = "prive";
+    s.codeInfo = CODES.KHTP4R9MDX;
+    s.favoris = ["Course à pied", "Natation", "Handball"];
+    if (extra) extra();
+  }
+
   var SCENARIOS = [
-    { t: "Un élève rejoint RUNGEN", k: "5 écrans",
-      d: "Le parcours complet, code en main. Utilise KHTP4R9MDX.",
+    { t: "L'app au quotidien", k: "Blocs 2-3",
+      d: "L'accueil d'un élève actif : volume de la semaine, courbe de forme, dernières séances.",
+      go: function () { connecte(function () { s.ecran = "accueil"; }); } },
+
+    { t: "Loguer une séance", k: "Bloc 2",
+      d: "Le geste central de l'app : choisir un sport, saisir distance et durée, enregistrer.",
+      go: function () { connecte(function () { s.ecran = "activite"; }); } },
+
+    { t: "Défis et anonymat", k: "Blocs 4-5",
+      d: "Le défi de classe, et surtout : un jeune RUNGEN apparaît en « Athlète RUNGEN » dans un classement public.",
+      go: function () { connecte(function () { s.ecran = "defis"; }); } },
+
+    { t: "Partager sa séance", k: "Bloc 6",
+      d: "L'image de fin d'activité, sans vrai nom, sans établissement, sans tracé.",
+      go: function () { connecte(function () { s.ecran = "partage"; }); } },
+
+    { t: "Un élève rejoint RUNGEN", k: "Bloc 1",
+      d: "Le parcours d'inscription complet, code en main. Utilise KHTP4R9MDX.",
       go: function () { s = etatInitial(); s.parcours = "rungen"; s.ecran = "code"; s.code = "KHTP4R9MDX"; } },
 
     { t: "Le code n'est pas encore actif", k: "Refus",
@@ -1075,13 +1415,9 @@
       d: "Une date de 2015 dans le parcours public : refusé, et rien n'est conservé.",
       go: function () { s = etatInitial(); s.parcours = "public"; s.ecran = "naissance"; s.naissance = { j: "12", m: "4", a: "2015" }; } },
 
-    { t: "Un mineur ne choisit pas sa visibilité", k: "Réglages",
+    { t: "Un mineur ne choisit pas sa visibilité", k: "Bloc 1",
       d: "Le réglage est remplacé par une explication, jusqu'à ses 18 ans.",
-      go: function () {
-        s = etatInitial(); s.parcours = "rungen"; s.pseudo = "coureur_du_95";
-        s.dateNaissance = new Date(2012, 3, 1); s.mineur = true; s.visibilite = "prive";
-        s.codeInfo = CODES.KHTP4R9MDX; s.ecran = "reglages";
-      } },
+      go: function () { connecte(function () { s.ecran = "reglages"; }); } },
 
     { t: "Générer un lot de codes", k: "Admin",
       d: "L'onglet d'encadrement, derrière la double authentification.",
