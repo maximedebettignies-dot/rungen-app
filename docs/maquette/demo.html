@@ -1,0 +1,1122 @@
+<title>Démo RUNGEN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #EFF2F7;
+    --surface: #FFFFFF;
+    --surface-2: #F7F9FC;
+    --ink: #0F141C;
+    --ink-soft: #515D6E;
+    --ink-faint: #7C8899;
+    --line: #DBE1EA;
+    --line-strong: #C2CCD9;
+    --accent: #1668C4;
+    --accent-wash: #E4EFFB;
+    --safe: #16704E;
+    --safe-wash: #E0F0E9;
+    --warn: #9A6410;
+    --warn-wash: #F8EEDC;
+    --danger: #B3261E;
+
+    /* L'écran garde la palette réelle de src/ui/theme.ts dans les deux thèmes. */
+    --app-bg: #0E1116;
+    --app-card: #181D26;
+    --app-line: #2A313D;
+    --app-text: #F2F5F9;
+    --app-soft: #9AA6B8;
+    --app-accent: #208AEF;
+    --app-danger: #E5484D;
+    --app-safe: #30A46C;
+    --app-warn: #F5A623;
+
+    --display: "Barlow Condensed", Impact, sans-serif;
+    --body: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0C1016; --surface: #141A22; --surface-2: #1A212B;
+      --ink: #EEF2F7; --ink-soft: #A3AEBD; --ink-faint: #7A8798;
+      --line: #263041; --line-strong: #36435A;
+      --accent: #61AEF5; --accent-wash: #16273C;
+      --safe: #5FC49B; --safe-wash: #12291F;
+      --warn: #D9A44A; --warn-wash: #2A2113;
+      --danger: #F2837C;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0C1016; --surface: #141A22; --surface-2: #1A212B;
+    --ink: #EEF2F7; --ink-soft: #A3AEBD; --ink-faint: #7A8798;
+    --line: #263041; --line-strong: #36435A;
+    --accent: #61AEF5; --accent-wash: #16273C;
+    --safe: #5FC49B; --safe-wash: #12291F;
+    --warn: #D9A44A; --warn-wash: #2A2113;
+    --danger: #F2837C;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--body); font-size: 16px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 34px 56px; }
+
+  h1 { font-family: var(--display); font-weight: 700; text-transform: uppercase;
+       font-size: clamp(2rem, 5vw, 2.9rem); line-height: 1; margin: 0; text-wrap: balance; }
+  h2 { font-family: var(--display); font-weight: 700; text-transform: uppercase;
+       font-size: 1.15rem; margin: 0; letter-spacing: 0.02em; }
+  p { margin: 0; }
+  .eyebrow { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+             text-transform: uppercase; color: var(--ink-faint); }
+  .lede { color: var(--ink-soft); max-width: 60ch; }
+  .note { font-size: 0.85rem; color: var(--ink-faint); line-height: 1.5; }
+
+  .top { display: flex; flex-direction: column; gap: 14px; margin-bottom: 30px; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+  .wordmark { font-family: var(--display); font-weight: 700; font-size: 1.3rem;
+              text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent); }
+  .badge { font-size: 0.74rem; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+           border: 1px solid var(--line-strong); color: var(--ink-soft); background: var(--surface-2); }
+  .badge.draft { border-color: var(--warn); color: var(--warn); background: var(--warn-wash); }
+
+  .stage { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 34px; align-items: start; }
+  @media (max-width: 880px) { .stage { grid-template-columns: 1fr; } }
+
+  /* ---------- Téléphone ---------- */
+  .phone-col { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .phone {
+    width: 100%; max-width: 344px;
+    background: var(--app-bg); color: var(--app-text);
+    border: 9px solid #262C36; border-radius: 34px;
+    height: 664px; display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 18px 40px rgba(10, 18, 30, 0.22);
+    font-size: 0.85rem;
+  }
+  .notch { flex: none; height: 22px; display: grid; place-items: center; }
+  .notch i { display: block; width: 58px; height: 4px; border-radius: 999px; background: #39414D; }
+
+  .nav {
+    flex: none; display: flex; align-items: center; gap: 10px;
+    padding: 6px 15px 10px; min-height: 34px;
+  }
+  .nav button {
+    background: none; border: none; color: var(--app-accent);
+    font: inherit; font-size: 0.82rem; cursor: pointer; padding: 2px 0;
+  }
+  .nav span { color: var(--app-soft); font-size: 0.8rem; }
+
+  .screen { flex: 1; overflow-y: auto; padding: 4px 18px 20px;
+            display: flex; flex-direction: column; gap: 13px; }
+  .screen::-webkit-scrollbar { width: 0; }
+
+  .tabs {
+    flex: none; display: flex; border-top: 1px solid var(--app-line);
+    background: var(--app-card);
+  }
+  .tabs button {
+    flex: 1; background: none; border: none; cursor: pointer; font: inherit;
+    padding: 9px 2px 12px; color: var(--app-soft);
+    display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 0.64rem;
+  }
+  .tabs button[aria-current="true"] { color: var(--app-accent); }
+  .tabs em { font-style: normal; font-size: 1rem; line-height: 1; }
+
+  /* Éléments d'écran */
+  .t { font-family: var(--display); font-size: 1.5rem; line-height: 1.08; font-weight: 700; }
+  .sub { color: var(--app-soft); font-size: 0.79rem; line-height: 1.45; }
+  .card { background: var(--app-card); border: 1px solid var(--app-line);
+          border-radius: 12px; padding: 13px; display: flex; flex-direction: column; gap: 8px; }
+  .lbl { color: var(--app-soft); font-size: 0.7rem; font-weight: 600; }
+  .row { display: flex; gap: 8px; }
+  .grow { flex: 1; }
+  .spacer { flex: 1; min-height: 4px; }
+
+  .fld {
+    width: 100%; background: var(--app-card); border: 1px solid var(--app-line);
+    border-radius: 8px; padding: 11px; color: var(--app-text);
+    font-family: var(--body); font-size: 0.92rem;
+  }
+  .fld::placeholder { color: #667488; }
+  .fld:focus-visible { outline: 2px solid var(--app-accent); outline-offset: 1px; }
+  .fld.code { font-family: var(--mono); letter-spacing: 0.14em; text-transform: uppercase; }
+  textarea.fld { resize: none; font-size: 0.85rem; }
+
+  .btn {
+    width: 100%; background: var(--app-accent); color: #fff; border: none;
+    border-radius: 11px; padding: 13px; font: inherit; font-weight: 600; font-size: 0.9rem;
+    cursor: pointer; text-align: center;
+  }
+  .btn:hover { filter: brightness(1.07); }
+  .btn.ghost { background: transparent; border: 1px solid var(--app-line); color: var(--app-text); }
+  .btn.danger { background: var(--app-danger); }
+  .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+  .btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+  .err {
+    background: #3A1D20; border: 1px solid var(--app-danger); border-radius: 8px;
+    padding: 11px; color: #FFC9CB; font-size: 0.8rem; line-height: 1.45;
+  }
+  .ok-box {
+    background: #10291D; border: 1px solid var(--app-safe); border-radius: 8px;
+    padding: 11px; color: #9BE3C0; font-size: 0.8rem; line-height: 1.45;
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    border: 1px solid var(--app-line); background: var(--app-card); color: var(--app-text);
+    border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.76rem; cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--app-accent); border-color: var(--app-accent); color: #fff; }
+
+  .opt {
+    width: 100%; text-align: left; background: var(--app-card); color: var(--app-text);
+    border: 1px solid var(--app-line); border-radius: 10px; padding: 12px;
+    font: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 3px;
+  }
+  .opt[aria-checked="true"] { border-color: var(--app-accent); }
+  .opt b { font-weight: 600; font-size: 0.88rem; }
+  .opt small { color: var(--app-soft); font-size: 0.72rem; line-height: 1.4; }
+
+  .tag { display: inline-block; font-size: 0.66rem; font-weight: 600; padding: 2px 8px;
+         border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+  .tag.wait { color: var(--app-warn); }
+  .tag.live { color: var(--app-safe); }
+  .tag.used { color: var(--app-soft); }
+  .tag.off  { color: var(--app-danger); }
+
+  .msg { border-left: 3px solid var(--app-line); padding-left: 10px; display: flex; flex-direction: column; gap: 2px; }
+  .msg.mine { border-left-color: var(--app-accent); }
+  .msg p { font-size: 0.82rem; }
+  .msg small { color: var(--app-soft); font-size: 0.68rem; }
+
+  .qr { width: 132px; height: 132px; margin: 0 auto; background: #fff; padding: 7px; border-radius: 6px; }
+
+  .check { display: flex; align-items: flex-start; gap: 11px; background: none; border: none;
+           color: var(--app-text); font: inherit; text-align: left; cursor: pointer; padding: 4px 0; font-size: 0.82rem; }
+  .box { width: 24px; height: 24px; flex: none; border-radius: 6px; border: 2px solid var(--app-line);
+         display: grid; place-items: center; font-size: 0.8rem; font-weight: 700; color: transparent; }
+  .check[aria-checked="true"] .box { background: var(--app-accent); border-color: var(--app-accent); color: #fff; }
+
+  .bullets { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px;
+             font-size: 0.79rem; line-height: 1.45; }
+  .bullets li::marker { color: var(--app-accent); }
+
+  .avatar { width: 84px; height: 84px; border-radius: 50%; background: var(--app-card);
+            border: 1px solid var(--app-line); display: grid; place-items: center;
+            font-family: var(--display); font-size: 2rem; color: var(--app-soft); margin: 0 auto; }
+
+  /* ---------- Panneau de démo ---------- */
+  .guide { display: flex; flex-direction: column; gap: 22px; }
+  .block { background: var(--surface); border: 1px solid var(--line); padding: 20px;
+           display: flex; flex-direction: column; gap: 13px; }
+
+  .scenarios { display: flex; flex-direction: column; gap: 9px; }
+  .scenario {
+    display: grid; grid-template-columns: auto 1fr; gap: 13px; align-items: start;
+    text-align: left; background: var(--surface-2); border: 1px solid var(--line);
+    padding: 12px 14px; font: inherit; cursor: pointer; color: var(--ink);
+  }
+  .scenario:hover { border-color: var(--accent); }
+  .scenario:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .scenario b { font-weight: 600; font-size: 0.92rem; }
+  .scenario span { display: block; color: var(--ink-soft); font-size: 0.83rem; line-height: 1.45; margin-top: 2px; }
+  .kbd { font-family: var(--mono); font-size: 0.74rem; font-weight: 600;
+         background: var(--accent-wash); color: var(--accent); padding: 3px 7px; border-radius: 4px; white-space: nowrap; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.87rem; }
+  th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faint); font-weight: 600; }
+  td.c { font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+  .tbl-scroll { overflow-x: auto; }
+
+  .reset { align-self: flex-start; background: none; border: 1px solid var(--line-strong);
+           color: var(--ink-soft); font: inherit; font-size: 0.83rem; padding: 7px 14px;
+           border-radius: 6px; cursor: pointer; }
+  .reset:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .screen > * { animation: rise 0.16s ease-out both; }
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="badge-row">
+      <span class="wordmark">RUNGEN</span>
+      <span class="badge draft">Prototype cliquable — aucune donnée réelle</span>
+      <span class="badge">Bloc 1 · Fondations</span>
+    </div>
+    <h1>La démo</h1>
+    <p class="lede">
+      Les écrans du bloc 1, navigables pour de vrai. Même palette, mêmes textes et mêmes règles
+      d&rsquo;âge que l&rsquo;application. Rien n&rsquo;est envoyé nulle part : tout se joue dans cette page.
+    </p>
+  </div>
+
+  <div class="stage">
+    <div class="phone-col">
+      <div class="phone">
+        <div class="notch"><i></i></div>
+        <div class="nav" id="nav"></div>
+        <div class="screen" id="screen"></div>
+        <div class="tabs" id="tabs" hidden></div>
+      </div>
+      <button class="reset" id="reset" type="button">Tout réinitialiser</button>
+    </div>
+
+    <div class="guide">
+      <div class="block">
+        <h2>À montrer en priorité</h2>
+        <p class="note">Chaque bouton place la démo au bon endroit.</p>
+        <div class="scenarios" id="scenarios"></div>
+      </div>
+
+      <div class="block">
+        <h2>Codes d&rsquo;essai</h2>
+        <p class="note">
+          Un code fait 10 caractères et n&rsquo;utilise ni O, ni I, ni 0, ni 1 — pour qu&rsquo;on ne se trompe
+          pas en le recopiant depuis le papier.
+        </p>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>Code</th><th>Ce qui se passe</th></tr></thead>
+            <tbody>
+              <tr><td class="c">KHTP4R9MDX</td><td>Actif : l&rsquo;autorisation signée est revenue, le compte peut être créé.</td></tr>
+              <tr><td class="c">BCDF7GHJ2K</td><td>En attente : imprimé, mais le papier n&rsquo;est pas encore revenu.</td></tr>
+              <tr><td class="c">MNPQ3RST4V</td><td>Déjà utilisé : un compte existe, le code est consommé.</td></tr>
+              <tr><td class="c">n&rsquo;importe quoi</td><td>Invalide.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="block">
+        <h2>Ce que la démo ne fait pas</h2>
+        <p class="note">
+          Pas de connexion Google ou Apple réelle : elle passe par le système du téléphone et
+          n&rsquo;existe pas dans un navigateur. Pas de base de données non plus — dans l&rsquo;application,
+          ce sont les règles en base qui refusent un âge insuffisant ou un code déjà utilisé,
+          pas l&rsquo;écran. Ici, l&rsquo;écran les rejoue pour la démonstration.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CODES = {
+    KHTP4R9MDX: { statut: "ok", etab: "Collège Jean Moulin", classe: "4e B" },
+    BCDF7GHJ2K: { statut: "en_attente", etab: "Collège Jean Moulin", classe: "4e B" },
+    MNPQ3RST4V: { statut: "utilise", etab: "Lycée Camille Claudel", classe: "2nde 3" }
+  };
+
+  var MESSAGES_CODE = {
+    en_attente: "Ce code n'est pas encore actif : ton autorisation signée n'a pas encore été reçue.",
+    utilise: "Ce code a déjà servi à créer un compte.",
+    invalide: "Ce code n'existe pas. Vérifie-le sur ton autorisation."
+  };
+
+  var SPORTS = {
+    distance: ["Course à pied", "Trail", "Marche", "Vélo route", "VTT", "Natation", "Aviron"],
+    duree: ["Musculation", "Handball", "Football", "Escalade", "Danse", "Boxe", "Tennis"]
+  };
+
+  var VISIBILITES = [
+    { v: "public", t: "Public", a: "Tous les membres connectés voient ton pseudo et ta photo." },
+    { v: "amis", t: "Amis", a: "Seuls tes amis te voient (les amis arrivent au bloc 4)." },
+    { v: "prive", t: "Privé", a: "Personne ne te voit." }
+  ];
+
+  function etatInitial() {
+    return {
+      ecran: "bienvenue",
+      parcours: null,
+      code: "",
+      codeInfo: null,
+      naissance: { j: "", m: "", a: "" },
+      dateNaissance: null,
+      mineur: false,
+      pseudo: "",
+      favoris: ["Course à pied"],
+      erreur: null,
+      consent: false,
+      onglet: "accueil",
+      visibilite: "amis",
+      photo: false,
+      adminOk: false,
+      adminSection: null,
+      totp: "",
+      fils: [
+        { id: 1, sujet: "Je n'arrive pas à ajouter un sport", cat: "Un problème", statut: "En cours",
+          quand: "il y a 2 jours",
+          messages: [
+            { moi: true, texte: "Bonjour, quand je cherche « ultimate » il ne se passe rien.", quand: "il y a 2 jours" },
+            { moi: false, texte: "Bonjour ! Ultimate n'est pas encore au catalogue. Tu peux le créer toi-même : tape son nom, puis choisis « Durée ». Je l'ajoute au catalogue pour la prochaine version.", quand: "hier" }
+          ] }
+      ],
+      filOuvert: null,
+      nouveauFil: { cat: "Un problème", sujet: "", message: "" },
+      brouillon: "",
+      etablissements: [
+        { id: 1, nom: "Collège Jean Moulin", ville: "Domont" },
+        { id: 2, nom: "Lycée Camille Claudel", ville: "Domont" }
+      ],
+      codesAdmin: [
+        { code: "KHTP4R9MDX", etab: "Collège Jean Moulin", classe: "4e B", statut: "actif" },
+        { code: "BCDF7GHJ2K", etab: "Collège Jean Moulin", classe: "4e B", statut: "cree" },
+        { code: "MNPQ3RST4V", etab: "Lycée Camille Claudel", classe: "2nde 3", statut: "utilise" }
+      ],
+      filtreCode: "tous",
+      lot: { classe: "", nombre: "25" },
+      rechercheCompte: "",
+      compteTrouve: null
+    };
+  }
+
+  var s = etatInitial();
+
+  // --- Règles d'âge : miroir de src/lib/age.ts -----------------------------
+  function ageLe(naissance, aujourdhui) {
+    var age = aujourdhui.getFullYear() - naissance.getFullYear();
+    var avant = aujourdhui.getMonth() < naissance.getMonth() ||
+      (aujourdhui.getMonth() === naissance.getMonth() && aujourdhui.getDate() < naissance.getDate());
+    return avant ? age - 1 : age;
+  }
+  function ageMini(espace) { return espace === "rungen" ? 11 : 15; }
+  function estMineur(d) { return ageLe(d, new Date()) < 18; }
+
+  function dateDepuisSaisie(j, m, a) {
+    if (!/^\d{1,2}$/.test(j) || !/^\d{1,2}$/.test(m) || !/^\d{4}$/.test(a)) return null;
+    var nj = +j, nm = +m, na = +a;
+    if (na < 1900) return null;
+    var d = new Date(na, nm - 1, nj);
+    if (d.getFullYear() !== na || d.getMonth() !== nm - 1 || d.getDate() !== nj) return null;
+    return d;
+  }
+
+  function ech(t) {
+    return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // --- Écrans --------------------------------------------------------------
+  var ECRANS = {};
+
+  ECRANS.bienvenue = function () {
+    return {
+      titre: null,
+      html:
+        '<div class="spacer"></div>' +
+        '<p class="t">RUNGEN</p>' +
+        '<p class="sub">Loguer tes activités, suivre ta forme et relever des challenges entre amis. Gratuit, porté par une association.</p>' +
+        '<div class="card">' +
+          "<p style=\"font-weight:600\">Je m'inscris ou je me connecte</p>" +
+          '<p class="sub">Espace public, à partir de 15 ans.</p>' +
+          '<button class="btn" data-go="public">Continuer avec Google</button>' +
+          '<button class="btn ghost" data-go="public">Continuer avec Apple</button>' +
+        '</div>' +
+        '<div class="card">' +
+          "<p style=\"font-weight:600\">J'ai un code RUNGEN</p>" +
+          "<p class=\"sub\">Le code figure sur l'autorisation parentale remise lors de l'intervention. À partir de 11 ans.</p>" +
+          '<button class="btn ghost" data-go="rungen">Entrer mon code</button>' +
+        '</div>' +
+        '<div class="spacer"></div>'
+    };
+  };
+
+  ECRANS.code = function () {
+    return {
+      titre: "Mon code RUNGEN", retour: "bienvenue",
+      html:
+        '<p class="t">Ton code RUNGEN</p>' +
+        "<p class=\"sub\">Recopie le code imprimé sur l'autorisation que tes parents ont signée. Il ne sert qu'une fois.</p>" +
+        erreurHtml() +
+        '<div style="display:flex;flex-direction:column;gap:5px">' +
+          '<p class="lbl">Code</p>' +
+          '<input class="fld code" id="f-code" maxlength="10" placeholder="ABCDEF2345" value="' + ech(s.code) + '" autocomplete="off">' +
+          '<p class="sub" style="font-size:0.7rem">10 caractères, sans les lettres O et I ni les chiffres 0 et 1.</p>' +
+        '</div>' +
+        '<button class="btn" data-act="verifier-code">Vérifier mon code</button>'
+    };
+  };
+
+  ECRANS.naissance = function () {
+    var mini = ageMini(s.parcours);
+    return {
+      titre: "Ma date de naissance", retour: s.parcours === "rungen" ? "code" : "bienvenue",
+      html:
+        '<p class="t">Ta date de naissance</p>' +
+        "<p class=\"sub\">Elle sert à vérifier ton âge et à protéger ton compte. Elle n'est jamais montrée aux autres, et ne sera plus modifiable ensuite.</p>" +
+        erreurHtml() +
+        '<div class="row">' +
+          '<div class="grow"><p class="lbl">Jour</p><input class="fld" id="f-j" inputmode="numeric" maxlength="2" placeholder="03" value="' + ech(s.naissance.j) + '"></div>' +
+          '<div class="grow"><p class="lbl">Mois</p><input class="fld" id="f-m" inputmode="numeric" maxlength="2" placeholder="09" value="' + ech(s.naissance.m) + '"></div>' +
+          '<div class="grow"><p class="lbl">Année</p><input class="fld" id="f-a" inputmode="numeric" maxlength="4" placeholder="2010" value="' + ech(s.naissance.a) + '"></div>' +
+        '</div>' +
+        '<p class="sub" style="font-size:0.72rem">Minimum ' + mini + " ans dans cet espace.</p>" +
+        '<button class="btn" data-act="valider-naissance">Continuer</button>'
+    };
+  };
+
+  ECRANS["info-donnees"] = function () {
+    var points = [
+      "On garde ton pseudo, ta date de naissance et les sports que tu choisis.",
+      "Ta date de naissance ne sert qu'à vérifier ton âge : personne d'autre que toi ne la voit.",
+      "Tant que tu es mineur, ton profil est privé : personne ne peut te chercher ni te voir.",
+      "Les gens de l'espace public ne peuvent jamais voir ton compte.",
+      "On ne garde aucune donnée de santé : ni ton poids, ni ton cœur.",
+      "Tu peux supprimer ton compte quand tu veux depuis les réglages."
+    ];
+    return {
+      titre: "Tes données", retour: "naissance",
+      html:
+        "<p class=\"t\">Ce que l'app fait avec tes données</p>" +
+        '<p class="sub">À lire avant de créer ton compte.</p>' +
+        '<div class="card"><ul class="bullets">' +
+          points.map(function (p) { return "<li>" + ech(p) + "</li>"; }).join("") +
+        '</ul></div>' +
+        '<button class="check" role="checkbox" aria-checked="' + s.consent + '" data-act="consent">' +
+          '<span class="box">&#10003;</span>' +
+          "<span>J'ai compris et je suis d'accord.</span>" +
+        '</button>' +
+        '<button class="btn" data-act="apres-consent"' + (s.consent ? "" : " disabled") + ">Continuer</button>"
+    };
+  };
+
+  ECRANS.connexion = function () {
+    return {
+      titre: "Connexion", retour: "info-donnees",
+      html:
+        '<div class="spacer"></div>' +
+        '<p class="t">Connexion</p>' +
+        "<p class=\"sub\">Connecte-toi avec ton compte Google ou Apple. Si ton compte est surveillé par tes parents, ils devront peut-être valider.</p>" +
+        '<button class="btn" data-act="aller-pseudo">Continuer avec Google</button>' +
+        '<button class="btn ghost" data-act="aller-pseudo">Continuer avec Apple</button>' +
+        '<div class="spacer"></div>'
+    };
+  };
+
+  ECRANS.pseudo = function () {
+    return {
+      titre: "Mon pseudo",
+      html:
+        '<p class="t">Choisis ton pseudo</p>' +
+        '<p class="sub">' + (s.parcours === "rungen"
+          ? "C'est le nom que les autres verront. Ne mets jamais ton vrai nom ni celui de ton collège."
+          : "C'est le nom que les autres verront. Tu pourras le changer plus tard.") + "</p>" +
+        erreurHtml() +
+        '<div style="display:flex;flex-direction:column;gap:5px">' +
+          '<p class="lbl">Pseudo</p>' +
+          '<input class="fld" id="f-pseudo" maxlength="20" placeholder="coureur_du_21" value="' + ech(s.pseudo) + '" autocomplete="off">' +
+          '<p class="sub" style="font-size:0.7rem">3 à 20 caractères : lettres, chiffres, « _ » et « . ».</p>' +
+        '</div>' +
+        '<button class="btn" data-act="creer-profil">Créer mon compte</button>'
+    };
+  };
+
+  ECRANS.sports = function () {
+    function groupe(cle, titre) {
+      return '<p class="lbl">' + titre + '</p><div class="chips">' +
+        SPORTS[cle].map(function (n) {
+          var on = s.favoris.indexOf(n) !== -1;
+          return '<button class="chip" aria-pressed="' + on + '" data-sport="' + ech(n) + '">' + ech(n) + "</button>";
+        }).join("") + "</div>";
+    }
+    return {
+      titre: "Mes sports",
+      html:
+        '<p class="t">Tes sports</p>' +
+        '<p class="sub">Choisis ceux que tu pratiques. Tu pourras en ajouter ou en retirer quand tu veux.</p>' +
+        '<input class="fld" placeholder="Chercher un sport…" disabled>' +
+        groupe("distance", "Distance") +
+        groupe("duree", "Durée") +
+        '<p class="sub" style="font-size:0.72rem">Un sport manque ? Tape son nom : l&rsquo;app propose le plus proche du catalogue avant de te laisser le créer.</p>' +
+        '<button class="btn" data-act="terminer">Terminer</button>'
+    };
+  };
+
+  // --- Application connectée ----------------------------------------------
+  ECRANS.accueil = function () {
+    return {
+      html:
+        '<p class="t">Salut ' + ech(s.pseudo || "coureur_du_21") + "</p>" +
+        '<p class="sub">' + (s.parcours === "rungen" ? "Tu es dans l'espace RUNGEN." : "Tu es dans l'espace public.") + "</p>" +
+        '<div class="card">' +
+          "<p style=\"font-weight:600\">Le log d'activité arrive au bloc 2.</p>" +
+          '<p class="sub">En attendant, ajuste tes sports favoris : ce sont eux qui apparaîtront quand tu logueras une séance.</p>' +
+        '</div>' +
+        '<p class="lbl">Mes sports</p>' +
+        '<div class="chips">' +
+          s.favoris.map(function (n) { return '<span class="chip" aria-pressed="true">' + ech(n) + "</span>"; }).join("") +
+        '</div>' +
+        (s.parcours === "rungen"
+          ? '<div class="card"><p class="lbl">Mon établissement</p><p style="font-size:0.84rem">' +
+            ech(s.codeInfo ? s.codeInfo.etab : "Collège Jean Moulin") + " · " +
+            ech(s.codeInfo ? s.codeInfo.classe : "4e B") + "</p></div>"
+          : "")
+    };
+  };
+
+  ECRANS.support = function () {
+    if (s.filOuvert) {
+      var f = s.fils.filter(function (x) { return x.id === s.filOuvert; })[0];
+      return {
+        titre: "Conversation", retourAct: "fermer-fil",
+        html:
+          '<p class="t">' + ech(f.sujet) + "</p>" +
+          '<span class="tag live">' + ech(f.statut) + "</span>" +
+          f.messages.map(function (m) {
+            return '<div class="msg' + (m.moi ? " mine" : "") + '">' +
+              "<p>" + ech(m.texte) + "</p>" +
+              "<small>" + (m.moi ? "Moi" : "Équipe RUNGEN") + " · " + ech(m.quand) + "</small></div>";
+          }).join("") +
+          '<div style="display:flex;flex-direction:column;gap:5px">' +
+            '<p class="lbl">Répondre</p>' +
+            '<textarea class="fld" id="f-rep" rows="3" placeholder="Ta réponse…">' + ech(s.brouillon) + "</textarea>" +
+          '</div>' +
+          '<button class="btn" data-act="envoyer-reponse">Envoyer</button>' +
+          '<p class="sub" style="font-size:0.72rem">Un message envoyé ne peut plus être modifié ni supprimé, des deux côtés.</p>'
+      };
+    }
+    return {
+      html:
+        '<p class="t">Support</p>' +
+        "<p class=\"sub\">Un souci, une idée ? Écris-nous. Les messages ne peuvent être ni modifiés ni supprimés, de part et d'autre.</p>" +
+        '<button class="btn" data-act="nouveau-fil">Nouvelle conversation</button>' +
+        s.fils.map(function (f) {
+          return '<button class="opt" data-fil="' + f.id + '">' +
+            '<span style="display:flex;justify-content:space-between;gap:8px;align-items:center">' +
+              "<b>" + ech(f.sujet) + '</b><span class="tag live">' + ech(f.statut) + "</span></span>" +
+            "<small>" + ech(f.cat) + " · " + ech(f.quand) + "</small></button>";
+        }).join("")
+    };
+  };
+
+  ECRANS["support-nouveau"] = function () {
+    var cats = ["Un problème", "Une idée", "Autre chose"];
+    return {
+      titre: "Nouvelle conversation", retourAct: "fermer-nouveau",
+      html:
+        '<p class="t">Nouvelle conversation</p>' +
+        "<p class=\"sub\">De quoi s'agit-il ?</p>" +
+        cats.map(function (c) {
+          return '<button class="opt" role="radio" aria-checked="' + (s.nouveauFil.cat === c) + '" data-cat="' + ech(c) + '"><b>' + ech(c) + "</b></button>";
+        }).join("") +
+        '<div style="display:flex;flex-direction:column;gap:5px">' +
+          '<p class="lbl">Sujet</p>' +
+          '<input class="fld" id="f-sujet" placeholder="Je n\'arrive pas à me connecter" value="' + ech(s.nouveauFil.sujet) + '">' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:5px">' +
+          '<p class="lbl">Message</p>' +
+          '<textarea class="fld" id="f-msg" rows="4" placeholder="Explique ce qui se passe…">' + ech(s.nouveauFil.message) + "</textarea>" +
+        '</div>' +
+        '<button class="btn" data-act="envoyer-fil">Envoyer</button>'
+    };
+  };
+
+  ECRANS.reglages = function () {
+    var vis = s.mineur
+      ? '<div class="card"><p style="font-weight:600">Ton profil est privé.</p>' +
+        "<p class=\"sub\">Tant que tu es mineur, ton profil reste privé : personne ne peut te chercher ni voir ta fiche. Tu pourras choisir à tes 18 ans.</p></div>"
+      : VISIBILITES.map(function (o) {
+          return '<button class="opt" role="radio" aria-checked="' + (s.visibilite === o.v) + '" data-vis="' + o.v + '">' +
+            "<b>" + o.t + "</b><small>" + ech(o.a) + "</small></button>";
+        }).join("");
+
+    return {
+      html:
+        '<p class="t">Réglages</p>' +
+        '<div class="avatar">' + ech((s.pseudo || "C").charAt(0).toUpperCase()) + "</div>" +
+        '<button class="btn ghost" data-act="photo">' + (s.photo ? "Changer ma photo" : "Ajouter une photo") + "</button>" +
+        '<div class="card">' +
+          '<p style="font-weight:600">' + ech(s.pseudo || "coureur_du_21") + "</p>" +
+          '<p class="sub">Né(e) le ' + ech(dateLisible()) + " · espace " + (s.parcours === "rungen" ? "RUNGEN" : "public") + "</p>" +
+        '</div>' +
+        '<p class="lbl">Qui peut me voir</p>' + vis +
+        '<div class="spacer"></div>' +
+        '<button class="btn ghost" data-act="deconnexion">Me déconnecter</button>' +
+        '<p class="lbl">Supprimer mon compte</p>' +
+        '<p class="sub" style="font-size:0.74rem">Tout est effacé : profil, sports et activités. Les conversations de support sont conservées sans ton nom.</p>' +
+        '<button class="btn danger" data-act="supprimer">Supprimer mon compte</button>'
+    };
+  };
+
+  // --- Onglet admin --------------------------------------------------------
+  ECRANS.admin = function () {
+    if (!s.adminOk) return ECRANS["admin-totp"]();
+    if (s.adminSection) return ECRANS["admin-" + s.adminSection]();
+
+    var entrees = [
+      ["etablissements", "Établissements", "Créer et retrouver les collèges et lycées partenaires."],
+      ["codes", "Codes d'invitation", "Générer un lot par classe, imprimer les autorisations, activer au retour du papier."],
+      ["comptes", "Comptes", "Désactiver, réactiver ou supprimer un compte."],
+      ["support", "Support", "Répondre aux messages et suivre leur statut."]
+    ];
+    return {
+      html:
+        '<p class="t">Encadrement</p>' +
+        '<p class="sub">Double authentification validée pour cette session.</p>' +
+        entrees.map(function (e) {
+          return '<button class="opt" data-admin="' + e[0] + '"><b>' + ech(e[1]) + "</b><small>" + ech(e[2]) + "</small></button>";
+        }).join("")
+    };
+  };
+
+  ECRANS["admin-totp"] = function () {
+    return {
+      html:
+        '<p class="t">Double authentification</p>' +
+        "<p class=\"sub\">Scanne ce QR code avec une application d'authentification, puis saisis le code à 6 chiffres qu'elle affiche.</p>" +
+        qrHtml() +
+        '<div class="card"><p style="font-weight:600;font-size:0.85rem">Impossible de scanner ?</p>' +
+          '<p class="sub">Saisis cette clé : <span style="font-family:var(--mono)">JBSW Y3DP EHPK 3PXP</span></p></div>' +
+        erreurHtml() +
+        '<div style="display:flex;flex-direction:column;gap:5px">' +
+          '<p class="lbl">Code à 6 chiffres</p>' +
+          '<input class="fld code" id="f-totp" inputmode="numeric" maxlength="6" placeholder="123456" value="' + ech(s.totp) + '">' +
+        '</div>' +
+        '<button class="btn" data-act="valider-totp">Valider</button>' +
+        '<p class="sub" style="font-size:0.72rem">Pour la démo, n&rsquo;importe quels 6 chiffres conviennent. Dans l&rsquo;application, les pouvoirs admin n&rsquo;existent en base qu&rsquo;avec un jeton vérifié.</p>'
+    };
+  };
+
+  ECRANS["admin-etablissements"] = function () {
+    return {
+      titre: "Établissements", retourAct: "admin-retour",
+      html:
+        '<p class="t">Établissements</p>' +
+        '<div style="display:flex;flex-direction:column;gap:5px"><p class="lbl">Nom</p>' +
+          '<input class="fld" placeholder="Collège Jean Moulin" disabled></div>' +
+        '<div style="display:flex;flex-direction:column;gap:5px"><p class="lbl">Ville</p>' +
+          '<input class="fld" placeholder="Domont" disabled></div>' +
+        '<button class="btn" disabled>Créer l&rsquo;établissement</button>' +
+        '<p class="lbl">' + s.etablissements.length + " établissement(s)</p>" +
+        s.etablissements.map(function (e) {
+          return '<div class="card"><p style="font-weight:600;font-size:0.86rem">' + ech(e.nom) +
+            '</p><p class="sub">' + ech(e.ville) + "</p></div>";
+        }).join("")
+    };
+  };
+
+  ECRANS["admin-codes"] = function () {
+    var LIB = { cree: "En attente du papier", actif: "Actif", utilise: "Utilisé", desactive: "Désactivé" };
+    var TON = { cree: "wait", actif: "live", utilise: "used", desactive: "off" };
+    var filtres = ["tous", "cree", "actif", "utilise"];
+    var visibles = s.codesAdmin.filter(function (c) {
+      return s.filtreCode === "tous" || c.statut === s.filtreCode;
+    });
+
+    return {
+      titre: "Codes", retourAct: "admin-retour",
+      html:
+        "<p class=\"t\">Codes d'invitation</p>" +
+        '<p class="sub">Génère un lot par classe. Le PDF sort avec une autorisation par page, code compris.</p>' +
+        '<p class="lbl">Établissement</p>' +
+        '<div class="chips">' +
+          s.etablissements.map(function (e, i) {
+            return '<span class="chip" aria-pressed="' + (i === 0) + '">' + ech(e.nom) + "</span>";
+          }).join("") +
+        '</div>' +
+        '<div class="row">' +
+          '<div class="grow"><p class="lbl">Classe</p><input class="fld" id="f-classe" placeholder="4e B" value="' + ech(s.lot.classe) + '"></div>' +
+          '<div style="width:96px"><p class="lbl">Nombre</p><input class="fld" id="f-nb" inputmode="numeric" maxlength="2" value="' + ech(s.lot.nombre) + '"></div>' +
+        '</div>' +
+        erreurHtml() +
+        '<button class="btn" data-act="generer-lot">Générer le lot et imprimer</button>' +
+        '<p class="lbl">Suivi</p>' +
+        '<div class="chips">' +
+          filtres.map(function (f) {
+            return '<button class="chip" aria-pressed="' + (s.filtreCode === f) + '" data-filtre="' + f + '">' +
+              (f === "tous" ? "Tous" : LIB[f]) + "</button>";
+          }).join("") +
+        '</div>' +
+        (visibles.length ? "" : '<p class="sub">Aucun code dans ce filtre.</p>') +
+        visibles.map(function (c) {
+          return '<div class="card">' +
+            '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center">' +
+              '<span style="font-family:var(--mono);font-weight:600;letter-spacing:0.1em;font-size:0.82rem">' + ech(c.code) + "</span>" +
+              '<span class="tag ' + TON[c.statut] + '">' + LIB[c.statut] + "</span></div>" +
+            '<p class="sub">' + ech(c.etab) + (c.classe ? " · " + ech(c.classe) : "") + "</p>" +
+            (c.statut === "cree" ? '<button class="btn" data-recu="' + ech(c.code) + '">Autorisation reçue</button>' : "") +
+            (c.statut === "cree" || c.statut === "actif"
+              ? '<button class="btn ghost" data-off="' + ech(c.code) + '">Désactiver</button>' : "") +
+            "</div>";
+        }).join("")
+    };
+  };
+
+  ECRANS["admin-comptes"] = function () {
+    var res = "";
+    if (s.compteTrouve === "aucun") {
+      res = '<div class="card"><p class="sub">Aucun compte pour ce code : il n&rsquo;a peut-être pas encore servi, ou il ne relève pas de ton établissement.</p></div>';
+    } else if (s.compteTrouve) {
+      res =
+        '<div class="card">' +
+          '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center">' +
+            '<span style="font-weight:600;font-size:0.9rem">' + ech(s.compteTrouve.pseudo) + "</span>" +
+            '<span class="tag ' + (s.compteTrouve.desactive ? "off" : "live") + '">' +
+              (s.compteTrouve.desactive ? "Désactivé" : "Actif") + "</span></div>" +
+          '<p class="sub">Espace RUNGEN · ' + ech(s.compteTrouve.etab) + " · " + ech(s.compteTrouve.classe) + "</p>" +
+          '<button class="btn ghost" data-act="bascule-compte">' +
+            (s.compteTrouve.desactive ? "Réactiver le compte" : "Désactiver le compte") + "</button>" +
+          '<button class="btn danger" data-act="supprimer-compte">Supprimer (retrait d&rsquo;accord parental)</button>' +
+        '</div>';
+    }
+    return {
+      titre: "Comptes", retourAct: "admin-retour",
+      html:
+        '<p class="t">Comptes</p>' +
+        "<p class=\"sub\">Les profils ne sont pas consultables librement, par conception. On part du code inscrit sur l'autorisation papier pour retrouver le compte concerné.</p>" +
+        '<div style="display:flex;flex-direction:column;gap:5px">' +
+          "<p class=\"lbl\">Code de l'autorisation</p>" +
+          '<input class="fld code" id="f-compte" maxlength="10" placeholder="MNPQ3RST4V" value="' + ech(s.rechercheCompte) + '">' +
+        '</div>' +
+        '<button class="btn" data-act="chercher-compte">Chercher le compte</button>' +
+        res +
+        '<p class="sub" style="font-size:0.72rem">Essaie <span style="font-family:var(--mono)">MNPQ3RST4V</span> : c&rsquo;est le seul code déjà utilisé.</p>'
+    };
+  };
+
+  ECRANS["admin-support"] = function () {
+    return {
+      titre: "Boîte de réception", retourAct: "admin-retour",
+      html:
+        '<p class="t">Boîte de réception</p>' +
+        "<p class=\"sub\">Les messages sont définitifs : tu peux répondre et changer le statut, rien d'autre.</p>" +
+        s.fils.map(function (f) {
+          return '<div class="card">' +
+            '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center">' +
+              '<b style="font-size:0.88rem">' + ech(f.sujet) + '</b><span class="tag live">' + ech(f.statut) + "</span></div>" +
+            '<p class="sub">' + ech(f.cat) + " · " + ech(f.quand) + "</p>" +
+            '<p class="lbl">Statut</p>' +
+            '<div class="chips">' +
+              ["Nouveau", "En cours", "Résolu"].map(function (st) {
+                return '<button class="chip" aria-pressed="' + (f.statut === st) + '" data-statut="' + f.id + "|" + st + '">' + st + "</button>";
+              }).join("") +
+            "</div></div>";
+        }).join("")
+    };
+  };
+
+  // --- Fragments -----------------------------------------------------------
+  function erreurHtml() {
+    return s.erreur ? '<div class="err" role="alert">' + ech(s.erreur) + "</div>" : "";
+  }
+
+  function dateLisible() {
+    if (!s.dateNaissance) return "—";
+    return s.dateNaissance.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  }
+
+  function qrHtml() {
+    // Damier déterministe : figure un QR sans prétendre en être un.
+    var n = 11, cell = 118 / n, r = "";
+    for (var y = 0; y < n; y++) {
+      for (var x = 0; x < n; x++) {
+        var coin = (x < 3 && y < 3) || (x > n - 4 && y < 3) || (x < 3 && y > n - 4);
+        var bord = coin && (x === 0 || y === 0 || x === 2 || y === 2 || x === n - 1 || y === n - 1 || x === n - 3 || y === n - 3);
+        var plein = coin ? bord || (x === 1 && y === 1) : ((x * 7 + y * 13 + x * y * 3) % 5 < 2);
+        if (plein) r += '<rect x="' + (7 + x * cell) + '" y="' + (7 + y * cell) + '" width="' + cell + '" height="' + cell + '" fill="#0E1116"/>';
+      }
+    }
+    return '<svg class="qr" viewBox="0 0 132 132" role="img" aria-label="QR code de configuration">' +
+      '<rect width="132" height="132" fill="#fff"/>' + r + "</svg>";
+  }
+
+  var TABS = [
+    { id: "accueil", t: "Accueil", i: "●" },
+    { id: "support", t: "Support", i: "✉" },
+    { id: "admin", t: "Admin", i: "★" },
+    { id: "reglages", t: "Réglages", i: "⚙" }
+  ];
+
+  var DANS_APP = { accueil: 1, support: 1, reglages: 1, admin: 1, "support-nouveau": 1 };
+
+  // --- Rendu ---------------------------------------------------------------
+  function rendre() {
+    var nom = s.ecran;
+    var vue = (ECRANS[nom] || ECRANS.bienvenue)();
+
+    document.getElementById("screen").innerHTML = vue.html;
+
+    var nav = document.getElementById("nav");
+    if (vue.retour) {
+      nav.innerHTML = '<button type="button" data-retour="' + vue.retour + '">&#8249; Retour</button>' +
+        "<span>" + ech(vue.titre || "") + "</span>";
+    } else if (vue.retourAct) {
+      nav.innerHTML = '<button type="button" data-act="' + vue.retourAct + '">&#8249; Retour</button>' +
+        "<span>" + ech(vue.titre || "") + "</span>";
+    } else {
+      nav.innerHTML = vue.titre ? "<span>" + ech(vue.titre) + "</span>" : "";
+    }
+
+    var tabs = document.getElementById("tabs");
+    var dansApp = !!DANS_APP[nom];
+    tabs.hidden = !dansApp;
+    if (dansApp) {
+      tabs.innerHTML = TABS.map(function (t) {
+        var courant = (nom === t.id) || (nom === "support-nouveau" && t.id === "support");
+        return '<button type="button" data-onglet="' + t.id + '" aria-current="' + courant + '">' +
+          "<em>" + t.i + "</em>" + t.t + "</button>";
+      }).join("");
+    }
+
+    document.getElementById("screen").scrollTop = 0;
+  }
+
+  function aller(ecran) { s.erreur = null; s.ecran = ecran; rendre(); }
+  function champ(id) { var e = document.getElementById(id); return e ? e.value : ""; }
+
+  // --- Actions -------------------------------------------------------------
+  var ACTIONS = {
+    "verifier-code": function () {
+      var v = champ("f-code").toUpperCase().trim();
+      s.code = v;
+      if (!/^[A-HJ-NP-Z2-9]{10}$/.test(v)) {
+        s.erreur = "Un code RUNGEN fait 10 caractères (lettres et chiffres, sans O, I, 0 ni 1).";
+        return rendre();
+      }
+      var info = CODES[v];
+      var statut = info ? info.statut : "invalide";
+      if (statut !== "ok") { s.erreur = MESSAGES_CODE[statut]; return rendre(); }
+      s.codeInfo = info;
+      aller("naissance");
+    },
+
+    "valider-naissance": function () {
+      s.naissance = { j: champ("f-j"), m: champ("f-m"), a: champ("f-a") };
+      var d = dateDepuisSaisie(s.naissance.j, s.naissance.m, s.naissance.a);
+      if (!d) { s.erreur = "Cette date n'existe pas. Vérifie le jour, le mois et l'année."; return rendre(); }
+      if (d.getTime() > Date.now()) { s.erreur = "La date de naissance ne peut pas être dans le futur."; return rendre(); }
+
+      var mini = ageMini(s.parcours);
+      if (ageLe(d, new Date()) < mini) {
+        s.erreur = "Il faut avoir au moins " + mini + " ans pour rejoindre " +
+          (s.parcours === "rungen" ? "l'espace RUNGEN" : "l'espace public") + ". Rien n'est enregistré.";
+        return rendre();
+      }
+      s.dateNaissance = d;
+      s.mineur = estMineur(d);
+      if (s.mineur) s.visibilite = "prive";
+      aller(s.parcours === "rungen" ? "info-donnees" : "pseudo");
+    },
+
+    consent: function () { s.consent = !s.consent; rendre(); },
+    "apres-consent": function () { aller("connexion"); },
+    "aller-pseudo": function () { aller("pseudo"); },
+
+    "creer-profil": function () {
+      var v = champ("f-pseudo").trim();
+      s.pseudo = v;
+      if (!/^[A-Za-z0-9_.]{3,20}$/.test(v)) {
+        s.erreur = "Le pseudo doit faire 3 à 20 caractères : lettres, chiffres, « _ » et « . ».";
+        return rendre();
+      }
+      if (/^(salope|connard|pute)$/i.test(v)) {
+        s.erreur = "Ce nom contient un mot interdit.";
+        return rendre();
+      }
+      aller("sports");
+    },
+
+    terminer: function () { s.onglet = "accueil"; aller("accueil"); },
+
+    "nouveau-fil": function () { aller("support-nouveau"); },
+    "fermer-nouveau": function () { aller("support"); },
+    "fermer-fil": function () { s.filOuvert = null; s.brouillon = ""; aller("support"); },
+
+    "envoyer-fil": function () {
+      var sujet = champ("f-sujet").trim(), msg = champ("f-msg").trim();
+      s.nouveauFil.sujet = sujet; s.nouveauFil.message = msg;
+      if (sujet.length < 3) { s.erreur = "Le sujet doit faire au moins 3 caractères."; return rendre(); }
+      if (!msg) { s.erreur = "Écris ton message avant d'envoyer."; return rendre(); }
+      var id = Date.now();
+      s.fils.unshift({ id: id, sujet: sujet, cat: s.nouveauFil.cat, statut: "Nouveau", quand: "à l'instant",
+        messages: [{ moi: true, texte: msg, quand: "à l'instant" }] });
+      s.nouveauFil = { cat: "Un problème", sujet: "", message: "" };
+      s.filOuvert = id;
+      aller("support");
+    },
+
+    "envoyer-reponse": function () {
+      var v = champ("f-rep").trim();
+      if (!v) return;
+      var f = s.fils.filter(function (x) { return x.id === s.filOuvert; })[0];
+      f.messages.push({ moi: true, texte: v, quand: "à l'instant" });
+      s.brouillon = "";
+      rendre();
+    },
+
+    photo: function () { s.photo = true; rendre(); },
+    deconnexion: function () { var f = s.fils; s = etatInitial(); s.fils = f; rendre(); },
+    supprimer: function () {
+      if (window.confirm("Tes activités, tes sports et ton profil seront supprimés. Cette action est définitive.")
+        && window.confirm("Confirmes-tu la suppression définitive de ton compte ?")) {
+        s = etatInitial(); rendre();
+      }
+    },
+
+    "valider-totp": function () {
+      var v = champ("f-totp").trim();
+      s.totp = v;
+      if (!/^\d{6}$/.test(v)) { s.erreur = "Code incorrect ou expiré. Regarde le code affiché en ce moment dans ton application."; return rendre(); }
+      s.adminOk = true; s.totp = "";
+      aller("admin");
+    },
+    "admin-retour": function () { s.adminSection = null; aller("admin"); },
+
+    "generer-lot": function () {
+      var classe = champ("f-classe").trim(), nb = +champ("f-nb");
+      s.lot = { classe: classe, nombre: champ("f-nb") };
+      if (!(nb >= 1 && nb <= 60)) { s.erreur = "Choisis un nombre de codes entre 1 et 60."; return rendre(); }
+      var alpha = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", nouveaux = [];
+      for (var i = 0; i < Math.min(nb, 3); i++) {
+        var c = "";
+        for (var k = 0; k < 10; k++) c += alpha.charAt(Math.floor(Math.random() * alpha.length));
+        nouveaux.push({ code: c, etab: s.etablissements[0].nom, classe: classe || null, statut: "cree" });
+      }
+      s.codesAdmin = nouveaux.concat(s.codesAdmin);
+      s.filtreCode = "cree";
+      s.erreur = null;
+      rendre();
+      window.alert("Lot de " + nb + " codes créé.\n\nDans l'application, le PDF des autorisations s'ouvre ici : une page par code, prête à imprimer et à faire signer.\n\n(" + Math.min(nb, 3) + " codes affichés dans la démo.)");
+    },
+
+    "chercher-compte": function () {
+      var v = champ("f-compte").toUpperCase().trim();
+      s.rechercheCompte = v;
+      var info = CODES[v];
+      s.compteTrouve = (info && info.statut === "utilise")
+        ? { pseudo: "sportif_du_78", etab: info.etab, classe: info.classe, desactive: false }
+        : "aucun";
+      rendre();
+    },
+    "bascule-compte": function () {
+      s.compteTrouve.desactive = !s.compteTrouve.desactive; rendre();
+    },
+    "supprimer-compte": function () {
+      if (window.confirm("Le compte « " + s.compteTrouve.pseudo + " » et toutes ses données seront supprimés. À n'utiliser qu'en cas de retrait de l'accord parental.")) {
+        s.compteTrouve = null; s.rechercheCompte = ""; rendre();
+      }
+    }
+  };
+
+  // --- Délégation ----------------------------------------------------------
+  document.getElementById("screen").addEventListener("click", function (ev) {
+    var el = ev.target.closest("[data-go],[data-act],[data-sport],[data-vis],[data-onglet],[data-fil],[data-cat],[data-admin],[data-filtre],[data-recu],[data-off],[data-statut]");
+    if (!el) return;
+
+    if (el.dataset.go) {
+      s.parcours = el.dataset.go;
+      return aller(s.parcours === "rungen" ? "code" : "naissance");
+    }
+    if (el.dataset.act) { var f = ACTIONS[el.dataset.act]; if (f) f(); return; }
+
+    if (el.dataset.sport) {
+      var n = el.dataset.sport, i = s.favoris.indexOf(n);
+      if (i === -1) s.favoris.push(n); else s.favoris.splice(i, 1);
+      return rendre();
+    }
+    if (el.dataset.vis) { s.visibilite = el.dataset.vis; return rendre(); }
+    if (el.dataset.fil) { s.filOuvert = +el.dataset.fil; return rendre(); }
+    if (el.dataset.cat) { s.nouveauFil.cat = el.dataset.cat; return rendre(); }
+    if (el.dataset.admin) { s.adminSection = el.dataset.admin; s.erreur = null; return rendre(); }
+    if (el.dataset.filtre) { s.filtreCode = el.dataset.filtre; return rendre(); }
+    if (el.dataset.recu) {
+      s.codesAdmin.forEach(function (c) { if (c.code === el.dataset.recu) c.statut = "actif"; });
+      return rendre();
+    }
+    if (el.dataset.off) {
+      s.codesAdmin.forEach(function (c) { if (c.code === el.dataset.off) c.statut = "desactive"; });
+      return rendre();
+    }
+    if (el.dataset.statut) {
+      var p = el.dataset.statut.split("|");
+      s.fils.forEach(function (x) { if (x.id === +p[0]) x.statut = p[1]; });
+      return rendre();
+    }
+  });
+
+  document.getElementById("nav").addEventListener("click", function (ev) {
+    var el = ev.target.closest("[data-retour],[data-act]");
+    if (!el) return;
+    if (el.dataset.retour) return aller(el.dataset.retour);
+    var f = ACTIONS[el.dataset.act]; if (f) f();
+  });
+
+  document.getElementById("tabs").addEventListener("click", function (ev) {
+    var el = ev.target.closest("[data-onglet]");
+    if (!el) return;
+    s.filOuvert = null;
+    s.adminSection = null;
+    aller(el.dataset.onglet);
+  });
+
+  // --- Scénarios -----------------------------------------------------------
+  var SCENARIOS = [
+    { t: "Un élève rejoint RUNGEN", k: "5 écrans",
+      d: "Le parcours complet, code en main. Utilise KHTP4R9MDX.",
+      go: function () { s = etatInitial(); s.parcours = "rungen"; s.ecran = "code"; s.code = "KHTP4R9MDX"; } },
+
+    { t: "Le code n'est pas encore actif", k: "Refus",
+      d: "Le papier signé n'est pas revenu : l'élève est bloqué avec un message clair.",
+      go: function () { s = etatInitial(); s.parcours = "rungen"; s.ecran = "code"; s.code = "BCDF7GHJ2K"; } },
+
+    { t: "Trop jeune pour l'espace public", k: "Refus",
+      d: "Une date de 2015 dans le parcours public : refusé, et rien n'est conservé.",
+      go: function () { s = etatInitial(); s.parcours = "public"; s.ecran = "naissance"; s.naissance = { j: "12", m: "4", a: "2015" }; } },
+
+    { t: "Un mineur ne choisit pas sa visibilité", k: "Réglages",
+      d: "Le réglage est remplacé par une explication, jusqu'à ses 18 ans.",
+      go: function () {
+        s = etatInitial(); s.parcours = "rungen"; s.pseudo = "coureur_du_95";
+        s.dateNaissance = new Date(2012, 3, 1); s.mineur = true; s.visibilite = "prive";
+        s.codeInfo = CODES.KHTP4R9MDX; s.ecran = "reglages";
+      } },
+
+    { t: "Générer un lot de codes", k: "Admin",
+      d: "L'onglet d'encadrement, derrière la double authentification.",
+      go: function () {
+        s = etatInitial(); s.parcours = "public"; s.pseudo = "Maxime";
+        s.dateNaissance = new Date(1999, 0, 1); s.ecran = "admin";
+      } },
+
+    { t: "Retrouver un compte par son code", k: "Admin",
+      d: "Les profils ne se parcourent pas : on part du papier. Essaie MNPQ3RST4V.",
+      go: function () {
+        s = etatInitial(); s.parcours = "public"; s.pseudo = "Maxime";
+        s.dateNaissance = new Date(1999, 0, 1);
+        s.adminOk = true; s.adminSection = "comptes"; s.ecran = "admin";
+      } }
+  ];
+
+  document.getElementById("scenarios").innerHTML = SCENARIOS.map(function (sc, i) {
+    return '<button class="scenario" type="button" data-sc="' + i + '">' +
+      '<span class="kbd">' + ech(sc.k) + "</span>" +
+      "<span><b>" + ech(sc.t) + "</b><span>" + ech(sc.d) + "</span></span></button>";
+  }).join("");
+
+  document.getElementById("scenarios").addEventListener("click", function (ev) {
+    var el = ev.target.closest("[data-sc]");
+    if (!el) return;
+    SCENARIOS[+el.dataset.sc].go();
+    rendre();
+    document.querySelector(".phone").scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+
+  document.getElementById("reset").addEventListener("click", function () {
+    s = etatInitial(); rendre();
+  });
+
+  rendre();
+})();
+</script>
