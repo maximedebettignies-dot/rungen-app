@@ -49,6 +49,19 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3dece32c-6e67-4a2f-8347-fb2e8fe27c40"
+      }
+    },
+    "owner": "maximedbts-team",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3dece32c-6e67-4a2f-8347-fb2e8fe27c40"
     }
   }
 }
