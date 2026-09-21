@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { messageErreur } from '@/lib/errors';
+import { prochaineEtapeMfa } from '@/lib/mfa';
 import { Bouton, Carte, Champ, Chargement, Ecran, Erreur, espace, Paragraphe, SousTitre, Titre } from '@/ui';
 import { QrCode } from '@/ui/qr-code';
 
@@ -41,15 +42,20 @@ export function DoubleAuth({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    const verifie = facteurs.totp.find((f) => f.status === 'verified');
-    if (verifie) {
-      setEtape({ nom: 'verification', facteur: verifie.id });
+    // `facteurs.all` et non `facteurs.totp` : ce dernier omet les enrôlements
+    // inachevés, qu'il faut justement purger. Voir `src/lib/mfa.ts`.
+    const suite = prochaineEtapeMfa(facteurs.all);
+    if (suite.action === 'verifier') {
+      setEtape({ nom: 'verification', facteur: suite.facteur });
       return;
     }
 
-    // Un enrôlement inachevé traîne parfois : on repart de zéro.
-    for (const enAttente of facteurs.totp.filter((f) => f.status !== 'verified')) {
-      await supabase.auth.mfa.unenroll({ factorId: enAttente.id });
+    for (const inacheve of suite.aPurger) {
+      const { error } = await supabase.auth.mfa.unenroll({ factorId: inacheve });
+      if (error) {
+        setErreur(messageErreur(error));
+        return;
+      }
     }
 
     const { data: nouveau, error: erreurEnrolement } = await supabase.auth.mfa.enroll({
