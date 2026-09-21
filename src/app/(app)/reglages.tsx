@@ -6,6 +6,7 @@ import { isMinor, type Visibility } from '@/lib/age';
 import { enFrancais } from '@/lib/date';
 import { useSession } from '@/lib/session';
 import { PhotoProfil } from '@/ui/photo-profil';
+import { ChoixSports } from '@/ui/choix-sports';
 import {
   Bouton,
   Carte,
@@ -26,7 +27,7 @@ const VISIBILITES: { valeur: Visibility; titre: string; aide: string }[] = [
 ];
 
 export default function Reglages() {
-  const { profil, rafraichirProfil, seDeconnecter } = useSession();
+  const { session, profil, rafraichirProfil, seDeconnecter } = useSession();
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
   const [suppression, setSuppression] = useState(false);
@@ -94,6 +95,12 @@ export default function Reglages() {
           {profil.space === 'rungen' ? 'RUNGEN' : 'public'}
         </SousTitre>
       </Carte>
+
+      <Titre>Mes sports</Titre>
+      <SousTitre>
+        Ce sont eux qui te seront proposés quand tu logues une séance.
+      </SousTitre>
+      {session ? <ChoixSports userId={session.user.id} /> : null}
 
       <Titre>Qui peut me voir</Titre>
       <Erreur>{erreur}</Erreur>

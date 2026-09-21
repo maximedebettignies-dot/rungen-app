@@ -157,9 +157,13 @@ export default function LoguerSeance() {
         <Titre>Loguer une séance</Titre>
         <Carte>
           <SousTitre>
-            Choisis d&apos;abord au moins un sport favori depuis l&apos;accueil : ce sont eux qui
+            Tu n&apos;as pas encore de sport favori. Choisis-en au moins un : ce sont eux qui
             apparaissent ici.
           </SousTitre>
+          <Bouton
+            titre="Choisir mes sports"
+            onPress={() => router.push('/(app)/reglages')}
+          />
         </Carte>
       </Ecran>
     );
