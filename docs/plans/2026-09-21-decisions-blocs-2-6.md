@@ -296,7 +296,7 @@ L'AIPD s'écrit entre le 3 et le 4, quand le périmètre des traitements est sta
 | T2 · points ouverts du bloc 1 | ci-dessus | à reprendre dans les specs concernées |
 | T3 · analyse d'impact RGPD | entre les blocs 3 et 4 | à faire |
 | 2 · log d'activité | `docs/specs/2026-09-21-bloc2-log-activite-design.md` | **fait** (base, logique, écrans) |
-| 3 · stats et charge | à écrire | à faire |
+| 3 · stats et charge | `docs/specs/2026-09-21-bloc3-stats-design.md` | **fait** |
 | 4 · social | à écrire | à faire |
 | 5 · clubs et défis | à écrire | à faire |
 | 6 · partage | à écrire | à faire |

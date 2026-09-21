@@ -38,6 +38,13 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
+        name="stats"
+        options={{
+          title: 'Stats',
+          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>▲</Text>,
+        }}
+      />
+      <Tabs.Screen
         name="support"
         options={{
           title: 'Support',
