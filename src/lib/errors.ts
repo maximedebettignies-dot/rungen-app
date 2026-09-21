@@ -32,6 +32,19 @@ const MESSAGES: Record<string, string> = {
   action_reservee_admin: "Cette action est réservée à l'administrateur.",
   majeur_requis: 'Un compte encadrant doit être majeur.',
 
+  // Séances (bloc 2)
+  date_future: 'Cette séance est dans le futur.',
+  date_trop_ancienne: 'On ne peut loguer que les 30 derniers jours.',
+  duree_invalide: 'La durée doit être comprise entre 1 minute et 24 heures.',
+  distance_requise: 'Ce sport se mesure en distance : indique combien de kilomètres.',
+  distance_interdite: "Ce sport se mesure en durée : la distance ne s'applique pas.",
+  distance_invalide: 'Cette distance ne semble pas réaliste.',
+  note_trop_longue: 'La note ne peut pas dépasser 280 caractères.',
+  activite_verrouillee:
+    'Cette séance compte dans un défi terminé : elle ne peut plus être modifiée.',
+  sport_inconnu: "Ce sport n'existe pas ou ne t'appartient pas.",
+  activity_one_sport: 'Une séance porte sur un seul sport.',
+
   // Support
   modification_interdite: 'Une conversation de support ne peut pas être modifiée.',
 };

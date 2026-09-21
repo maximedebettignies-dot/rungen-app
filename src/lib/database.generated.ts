@@ -16,6 +16,73 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          created_at: string
+          custom_sport_id: string | null
+          distance_m: number | null
+          duration_s: number
+          effort: Database["public"]["Enums"]["effort"] | null
+          id: string
+          locked_at: string | null
+          note: string | null
+          performed_on: string
+          sport_id: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_sport_id?: string | null
+          distance_m?: number | null
+          duration_s: number
+          effort?: Database["public"]["Enums"]["effort"] | null
+          id?: string
+          locked_at?: string | null
+          note?: string | null
+          performed_on: string
+          sport_id?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_sport_id?: string | null
+          distance_m?: number | null
+          duration_s?: number
+          effort?: Database["public"]["Enums"]["effort"] | null
+          id?: string
+          locked_at?: string | null
+          note?: string | null
+          performed_on?: string
+          sport_id?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_custom_sport_id_fkey"
+            columns: ["custom_sport_id"]
+            isOneToOne: false
+            referencedRelation: "custom_sports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "sports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       banned_words: {
         Row: {
           word: string
@@ -520,6 +587,11 @@ export type Database = {
           code: string
         }[]
       }
+      famille_sport: {
+        Args: { p_custom: string | null; p_sport: number | null }
+        Returns: Database["public"]["Enums"]["sport_family"]
+      }
+      jours_saisie_retroactive: { Args: never; Returns: number }
       has_mfa: { Args: never; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
       is_minor: { Args: { birth: string }; Returns: boolean }
@@ -533,6 +605,7 @@ export type Database = {
       storage_owner: { Args: { chemin: string }; Returns: string }
     }
     Enums: {
+      effort: "facile" | "correct" | "dur"
       invite_kind: "eleve" | "prof_eps"
       invite_status: "cree" | "actif" | "utilise" | "desactive"
       pace_unit: "min_per_km" | "km_per_h" | "min_per_100m" | "none"

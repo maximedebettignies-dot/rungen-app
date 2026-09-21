@@ -47,3 +47,17 @@ test('messageStatutCode : un message par statut de code', () => {
   assert.match(messageStatutCode('utilise')!, /déjà servi/);
   assert.match(messageStatutCode('invalide')!, /n'existe pas/);
 });
+
+test('messageErreur : règles du bloc 2', () => {
+  assert.match(messageErreur({ message: 'date_trop_ancienne' }), /30 derniers jours/);
+  assert.match(messageErreur({ message: 'distance_requise' }), /combien de kilomètres/);
+  assert.match(messageErreur({ message: 'activite_verrouillee' }), /défi terminé/);
+});
+
+test('messageErreur : la contrainte du sport unique est traduite', () => {
+  const erreur = {
+    message: 'new row for relation "activities" violates check constraint "activity_one_sport"',
+    code: '23514',
+  };
+  assert.equal(messageErreur(erreur), 'Une séance porte sur un seul sport.');
+});

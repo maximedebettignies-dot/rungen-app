@@ -57,6 +57,8 @@ export type InviteCode = Tables['invite_codes']['Row'];
 export type RungenMembership = Tables['rungen_memberships']['Row'];
 export type SupportThread = Tables['support_threads']['Row'];
 export type SupportMessage = Tables['support_messages']['Row'];
+export type Activity = Tables['activities']['Row'];
+export type Effort = Enums['effort'];
 
 /** Carte de profil visible par les autres : jamais la date de naissance. */
 export type PublicProfile = PublicGenere['Views']['public_profiles']['Row'];

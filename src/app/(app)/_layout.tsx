@@ -30,6 +30,14 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
+        name="activite"
+        options={{
+          title: 'Activité',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>＋</Text>,
+        }}
+      />
+      <Tabs.Screen
         name="support"
         options={{
           title: 'Support',

@@ -1,6 +1,8 @@
 # Blocs 2 à 6 — ce qu'il faut valider avant de coder
 
-Statut : **brouillon à valider avec Maxime**. Rédigé le 21/09/2026.
+Statut : **validé par Maxime le 21/09/2026**. Toutes les recommandations sont retenues
+telles quelles. Ce document fait foi pour les specs des blocs 2 à 6 ; il sera amendé si
+les premiers retours terrain le demandent.
 
 Ce document ne remplace pas les specs : chaque bloc aura la sienne, dans `docs/specs/`.
 Il sert à trancher en amont les décisions qui engagent le modèle de données ou la
@@ -286,7 +288,15 @@ L'AIPD s'écrit entre le 3 et le 4, quand le périmètre des traitements est sta
 
 ---
 
-## Réponses attendues
+## Suivi
 
-Pour lancer la spec du bloc 2, il me suffit de : **T1, T2, et 2.1 à 2.5**.
-Le reste peut être tranché plus tard, bloc par bloc.
+| Bloc | Spec | Implémentation |
+|---|---|---|
+| T1 · signalement et blocage | avec le bloc 4 | à faire |
+| T2 · points ouverts du bloc 1 | ci-dessus | à reprendre dans les specs concernées |
+| T3 · analyse d'impact RGPD | entre les blocs 3 et 4 | à faire |
+| 2 · log d'activité | `docs/specs/2026-09-21-bloc2-log-activite-design.md` | **fait** (base, logique, écrans) |
+| 3 · stats et charge | à écrire | à faire |
+| 4 · social | à écrire | à faire |
+| 5 · clubs et défis | à écrire | à faire |
+| 6 · partage | à écrire | à faire |

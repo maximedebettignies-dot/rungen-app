@@ -7,8 +7,8 @@ import { chargerSeances, cumul, type SeanceAffichee } from '@/lib/seances';
 import { enFrancais } from '@/lib/date';
 import { useSession } from '@/lib/session';
 import {
-  Bouton,
   Carte,
+  Chargement,
   couleurs,
   Ecran,
   Erreur,
@@ -17,24 +17,16 @@ import {
   Titre,
 } from '@/ui';
 
-/** Lundi de la semaine en cours, en heure locale. */
-function debutDeSemaine(aujourdhui = new Date()): Date {
-  const d = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate());
-  const depuisLundi = (d.getDay() + 6) % 7;
-  d.setDate(d.getDate() - depuisLundi);
-  return d;
-}
-
-export default function Accueil() {
+export default function Historique() {
   const router = useRouter();
-  const { session, profil } = useSession();
+  const { session } = useSession();
   const [seances, setSeances] = useState<SeanceAffichee[]>([]);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
 
   const charger = useCallback(async () => {
     if (!session) return;
-    const { data, error } = await chargerSeances(session.user.id, 30);
+    const { data, error } = await chargerSeances(session.user.id);
     if (error) setErreur(messageErreur(error));
     else setSeances(data ?? []);
     setChargement(false);
@@ -46,78 +38,68 @@ export default function Accueil() {
     }, [charger]),
   );
 
-  const semaine = useMemo(() => {
-    const debut = debutDeSemaine();
-    return cumul(
-      seances.filter((s) => new Date(`${s.performed_on}T00:00:00`).getTime() >= debut.getTime()),
-    );
+  const ceMois = useMemo(() => {
+    const debut = new Date();
+    debut.setDate(1);
+    const cle = `${debut.getFullYear()}-${String(debut.getMonth() + 1).padStart(2, '0')}`;
+    return cumul(seances.filter((s) => s.performed_on.startsWith(cle)));
   }, [seances]);
 
-  const recentes = seances.slice(0, 3);
+  if (chargement) return <Chargement />;
 
   return (
     <Ecran>
-      <Titre>Salut {profil?.pseudo}</Titre>
-      <SousTitre>
-        {profil?.space === 'rungen' ? 'Tu es dans l’espace RUNGEN.' : 'Tu es dans l’espace public.'}
-      </SousTitre>
+      <Titre>Mon historique</Titre>
       <Erreur>{erreur}</Erreur>
 
       <View style={{ flexDirection: 'row', gap: espace.sm }}>
         <Carte style={{ flex: 1 }}>
-          <Text style={{ color: couleurs.texte, fontSize: 26, fontWeight: '700' }}>
-            {semaine.distanceM > 0 ? formaterDistance(semaine.distanceM) : formaterDuree(semaine.dureeS)}
+          <Text style={{ color: couleurs.texte, fontSize: 24, fontWeight: '700' }}>
+            {ceMois.distanceM > 0 ? formaterDistance(ceMois.distanceM) : formaterDuree(ceMois.dureeS)}
           </Text>
-          <Text style={{ color: couleurs.texteDoux, fontSize: 13 }}>cette semaine</Text>
+          <Text style={{ color: couleurs.texteDoux, fontSize: 13 }}>ce mois-ci</Text>
         </Carte>
         <Carte style={{ flex: 1 }}>
-          <Text style={{ color: couleurs.texte, fontSize: 26, fontWeight: '700' }}>
-            {semaine.nombre}
+          <Text style={{ color: couleurs.texte, fontSize: 24, fontWeight: '700' }}>
+            {ceMois.nombre}
           </Text>
           <Text style={{ color: couleurs.texteDoux, fontSize: 13 }}>
-            {semaine.nombre > 1 ? 'séances' : 'séance'}
+            {ceMois.nombre > 1 ? 'séances' : 'séance'}
           </Text>
         </Carte>
       </View>
 
-      <Bouton titre="Loguer une séance" onPress={() => router.push('/(app)/activite')} />
-
-      {!chargement && seances.length === 0 ? (
+      {seances.length === 0 ? (
         <Carte>
           <SousTitre>
-            Tu n&apos;as encore rien logué. Ta première séance fera apparaître tes totaux ici.
+            Aucune séance pour l&apos;instant. Logue ta première depuis l&apos;onglet Activité.
           </SousTitre>
         </Carte>
       ) : null}
 
-      {recentes.length > 0 ? <SousTitre>Dernières séances</SousTitre> : null}
-      {recentes.map((s) => {
+      {seances.map((s) => {
         const rythme = allure(s.distance_m, s.duration_s, s.sportUnite);
         return (
           <Pressable key={s.id} onPress={() => router.push(`/(app)/activite/${s.id}`)}>
             <Carte>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: espace.sm }}>
-                <Text style={{ color: couleurs.texte, fontWeight: '600', flex: 1 }}>{s.sportNom}</Text>
+                <Text style={{ color: couleurs.texte, fontWeight: '600', flex: 1 }}>
+                  {s.sportNom}
+                  {s.locked_at ? ' 🔒' : ''}
+                </Text>
                 <Text style={{ color: couleurs.texte, fontWeight: '700' }}>
                   {s.distance_m ? formaterDistance(s.distance_m) : formaterDuree(s.duration_s)}
                 </Text>
               </View>
               <Text style={{ color: couleurs.texteDoux, fontSize: 13 }}>
                 {enFrancais(s.performed_on)}
+                {s.distance_m ? ` · ${formaterDuree(s.duration_s)}` : ''}
                 {rythme ? ` · ${rythme}` : ''}
               </Text>
             </Carte>
           </Pressable>
         );
       })}
-
-      {seances.length > 3 ? (
-        <Bouton
-          titre="Tout mon historique"
-          variante="secondaire"
-          onPress={() => router.push('/(app)/activite/historique')}
-        />
-      ) : null}
     </Ecran>
   );
 }
