@@ -1,0 +1,693 @@
+<title>Maquette RUNGEN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground: #EFF2F7;
+    --surface: #FFFFFF;
+    --surface-2: #F7F9FC;
+    --ink: #0F141C;
+    --ink-soft: #515D6E;
+    --ink-faint: #7C8899;
+    --line: #DBE1EA;
+    --line-strong: #C2CCD9;
+    --accent: #1668C4;
+    --accent-bright: #208AEF;
+    --accent-wash: #E4EFFB;
+    --safe: #16704E;
+    --safe-wash: #E0F0E9;
+    --warn: #9A6410;
+    --warn-wash: #F8EEDC;
+
+    /* Écrans de l'app : la palette réelle de src/ui/theme.ts */
+    --phone-bg: #0E1116;
+    --phone-card: #181D26;
+    --phone-line: #2A313D;
+    --phone-text: #F2F5F9;
+    --phone-soft: #9AA6B8;
+    --phone-accent: #208AEF;
+
+    --display: "Barlow Condensed", "Haettenschweiler", Impact, sans-serif;
+    --body: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0C1016;
+      --surface: #141A22;
+      --surface-2: #1A212B;
+      --ink: #EEF2F7;
+      --ink-soft: #A3AEBD;
+      --ink-faint: #7A8798;
+      --line: #263041;
+      --line-strong: #36435A;
+      --accent: #61AEF5;
+      --accent-bright: #4AA0F2;
+      --accent-wash: #16273C;
+      --safe: #5FC49B;
+      --safe-wash: #12291F;
+      --warn: #D9A44A;
+      --warn-wash: #2A2113;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0C1016;
+    --surface: #141A22;
+    --surface-2: #1A212B;
+    --ink: #EEF2F7;
+    --ink-soft: #A3AEBD;
+    --ink-faint: #7A8798;
+    --line: #263041;
+    --line-strong: #36435A;
+    --accent: #61AEF5;
+    --accent-bright: #4AA0F2;
+    --accent-wash: #16273C;
+    --safe: #5FC49B;
+    --safe-wash: #12291F;
+    --warn: #D9A44A;
+    --warn-wash: #2A2113;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 0;
+  }
+
+  /* ---------- Typographie ---------- */
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; text-wrap: balance; margin: 0; letter-spacing: 0.005em; }
+  h1 { font-size: clamp(2.6rem, 7vw, 4.2rem); line-height: 0.98; text-transform: uppercase; }
+  h2 { font-size: clamp(1.7rem, 4vw, 2.3rem); line-height: 1.08; text-transform: uppercase; }
+  h3 { font-size: 1.22rem; line-height: 1.2; font-weight: 600; }
+  p { margin: 0; }
+
+  .eyebrow {
+    font-family: var(--body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .lede { font-size: 1.12rem; color: var(--ink-soft); max-width: 62ch; }
+  .note { font-size: 0.88rem; color: var(--ink-faint); }
+  strong { font-weight: 600; color: var(--ink); }
+  .mono { font-family: var(--mono); font-weight: 500; }
+
+  /* ---------- En-tête ---------- */
+  header {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .head-inner { display: flex; flex-direction: column; gap: 22px; padding-block: 52px 46px; }
+
+  .badge-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 0.76rem; font-weight: 600; letter-spacing: 0.03em;
+    padding: 5px 11px; border-radius: 999px;
+    border: 1px solid var(--line-strong); color: var(--ink-soft);
+    background: var(--surface-2);
+  }
+  .badge.draft { border-color: var(--warn); color: var(--warn); background: var(--warn-wash); }
+
+  .wordmark {
+    font-family: var(--display); font-weight: 700; font-size: 1.35rem;
+    text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent);
+  }
+
+  .head-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 34px; align-items: end; }
+  @media (max-width: 760px) { .head-grid { grid-template-columns: 1fr; gap: 26px; } }
+
+  .facts { display: flex; flex-direction: column; gap: 0; border-top: 2px solid var(--ink); }
+  .fact {
+    display: flex; justify-content: space-between; gap: 16px;
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+    font-size: 0.9rem;
+  }
+  .fact dt { color: var(--ink-faint); }
+  .fact dd { margin: 0; font-weight: 600; text-align: right; }
+
+  /* ---------- Sections ---------- */
+  section { padding-block: 58px; border-bottom: 1px solid var(--line); }
+  .sec-head { display: flex; flex-direction: column; gap: 12px; margin-bottom: 34px; max-width: 64ch; }
+
+  /* ---------- Les deux espaces ---------- */
+  .spaces { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch; }
+  @media (max-width: 860px) { .spaces { grid-template-columns: 1fr; } }
+
+  .space {
+    background: var(--surface); border: 1px solid var(--line);
+    padding: 24px; display: flex; flex-direction: column; gap: 14px;
+  }
+  .space.public { border-right: none; }
+  .space.rungen { border-left: none; }
+  @media (max-width: 860px) {
+    .space.public, .space.rungen { border: 1px solid var(--line); }
+  }
+
+  .space-age {
+    font-family: var(--display); font-size: 3.1rem; line-height: 0.85;
+    font-weight: 700; color: var(--accent);
+  }
+  .space-age span { font-size: 1rem; font-family: var(--body); font-weight: 600; color: var(--ink-soft); }
+
+  .space ul { margin: 0; padding-left: 1.05em; display: flex; flex-direction: column; gap: 7px; font-size: 0.93rem; color: var(--ink-soft); }
+  .space li::marker { color: var(--line-strong); }
+
+  .wall {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 24px 16px; background: var(--safe-wash);
+    border-block: 1px solid var(--line); border-inline: 1px dashed var(--safe);
+    min-width: 168px;
+  }
+  .wall-label {
+    font-family: var(--display); text-transform: uppercase; font-size: 1.05rem;
+    color: var(--safe); text-align: center; line-height: 1.1; font-weight: 700;
+  }
+  .wall-note { font-size: 0.78rem; color: var(--safe); text-align: center; line-height: 1.4; }
+  .wall-icon { color: var(--safe); }
+  @media (max-width: 860px) {
+    .wall { border: 1px dashed var(--safe); min-width: 0; flex-direction: row; justify-content: center; gap: 14px; }
+    .wall-label, .wall-note { text-align: left; }
+  }
+
+  /* ---------- Parcours : écrans ---------- */
+  .rail {
+    display: grid; grid-auto-flow: column; grid-auto-columns: 232px;
+    gap: 20px; overflow-x: auto; padding-bottom: 14px;
+    scroll-snap-type: x mandatory;
+  }
+  .rail > * { scroll-snap-align: start; }
+
+  .step { display: flex; flex-direction: column; gap: 12px; }
+  .step-head { display: flex; align-items: baseline; gap: 9px; }
+  .step-num {
+    font-family: var(--mono); font-size: 0.78rem; font-weight: 600;
+    color: var(--accent); background: var(--accent-wash);
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .step-title { font-weight: 600; font-size: 0.96rem; }
+  .step-note { font-size: 0.82rem; color: var(--ink-faint); line-height: 1.45; }
+
+  /* Téléphone */
+  .phone {
+    background: var(--phone-bg);
+    border: 8px solid #262C36;
+    border-radius: 26px;
+    padding: 14px 13px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+    min-height: 372px;
+    box-shadow: 0 10px 26px rgba(10, 18, 30, 0.18);
+    color: var(--phone-text);
+    font-size: 0.78rem;
+    line-height: 1.45;
+  }
+  .phone-notch {
+    width: 52px; height: 4px; border-radius: 999px;
+    background: #39414D; margin: 0 auto 4px;
+  }
+  .p-title { font-family: var(--display); font-size: 1.32rem; text-transform: none; line-height: 1.1; color: var(--phone-text); font-weight: 700; }
+  .p-sub { color: var(--phone-soft); font-size: 0.73rem; line-height: 1.4; }
+  .p-card {
+    background: var(--phone-card); border: 1px solid var(--phone-line);
+    border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .p-label { color: var(--phone-soft); font-size: 0.66rem; font-weight: 600; }
+  .p-input {
+    background: var(--phone-card); border: 1px solid var(--phone-line);
+    border-radius: 7px; padding: 9px 10px; color: var(--phone-text);
+    font-family: var(--mono); letter-spacing: 0.12em; font-size: 0.82rem;
+  }
+  .p-input.plain { font-family: var(--body); letter-spacing: 0; }
+  .p-btn {
+    background: var(--phone-accent); color: #fff; border-radius: 9px;
+    padding: 10px; text-align: center; font-weight: 600; font-size: 0.8rem;
+  }
+  .p-btn.ghost { background: transparent; border: 1px solid var(--phone-line); color: var(--phone-text); }
+  .p-list { margin: 0; padding-left: 1em; display: flex; flex-direction: column; gap: 5px; color: var(--phone-text); font-size: 0.71rem; line-height: 1.4; }
+  .p-list li::marker { color: var(--phone-accent); }
+  .p-check { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; }
+  .p-box {
+    width: 17px; height: 17px; border-radius: 4px; flex: none;
+    background: var(--phone-accent); color: #fff;
+    display: grid; place-items: center; font-size: 0.66rem; font-weight: 700;
+  }
+  .p-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .p-chip {
+    border: 1px solid var(--phone-line); border-radius: 999px;
+    padding: 4px 9px; font-size: 0.68rem; color: var(--phone-text);
+  }
+  .p-chip.on { background: var(--phone-accent); border-color: var(--phone-accent); color: #fff; }
+  .p-spacer { flex: 1; }
+
+  /* ---------- Rôle du prof ---------- */
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(258px, 1fr)); gap: 18px; }
+  .panel {
+    background: var(--surface); border: 1px solid var(--line);
+    padding: 20px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .panel h3 { color: var(--ink); }
+  .panel p { font-size: 0.92rem; color: var(--ink-soft); }
+  .panel.nope { background: var(--surface-2); }
+  .panel.nope h3 { color: var(--ink-soft); }
+
+  .rule-list { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; list-style: none; }
+  .rule {
+    display: grid; grid-template-columns: 22px 1fr; gap: 12px;
+    padding: 13px 0; border-bottom: 1px solid var(--line);
+    font-size: 0.95rem;
+  }
+  .rule:last-child { border-bottom: none; }
+  .rule-mark { color: var(--safe); padding-top: 3px; }
+  .rule b { font-weight: 600; }
+  .rule span { color: var(--ink-soft); display: block; font-size: 0.88rem; margin-top: 2px; }
+
+  /* ---------- Code d'invitation ---------- */
+  .code-demo {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    gap: 26px; align-items: center;
+  }
+  @media (max-width: 760px) { .code-demo { grid-template-columns: 1fr; } }
+
+  .paper {
+    background: var(--surface); border: 1px solid var(--line-strong);
+    padding: 22px; display: flex; flex-direction: column; gap: 14px;
+    box-shadow: 3px 3px 0 var(--line);
+  }
+  .paper-title { font-family: var(--display); text-transform: uppercase; font-size: 1.15rem; }
+  .paper-line { height: 1px; background: var(--line); }
+  .paper-sig { height: 26px; border-bottom: 1px solid var(--line-strong); }
+  .code-box {
+    border: 2px solid var(--accent-bright); border-radius: 6px;
+    padding: 12px; text-align: center;
+  }
+  .code-box .code-label { font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+  .code-box .code-value {
+    font-family: var(--mono); font-weight: 600; font-size: 1.32rem;
+    letter-spacing: 0.16em; color: var(--ink); margin-top: 5px;
+  }
+
+  .states { display: flex; flex-direction: column; gap: 9px; }
+  .state {
+    display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: center;
+    border: 1px solid var(--line); background: var(--surface);
+    padding: 12px 14px;
+  }
+  .pill {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.03em;
+    padding: 3px 9px; border-radius: 999px; white-space: nowrap;
+  }
+  .pill.wait { background: var(--warn-wash); color: var(--warn); }
+  .pill.live { background: var(--safe-wash); color: var(--safe); }
+  .pill.used { background: var(--surface-2); color: var(--ink-faint); border: 1px solid var(--line); }
+  .state p { font-size: 0.87rem; color: var(--ink-soft); }
+
+  /* ---------- Statut ---------- */
+  .status { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+  .stat { background: var(--surface); border: 1px solid var(--line); padding: 17px; display: flex; flex-direction: column; gap: 5px; }
+  .stat-k { font-family: var(--display); font-size: 1.9rem; line-height: 1; color: var(--accent); }
+  .stat-l { font-weight: 600; font-size: 0.93rem; }
+  .stat-n { font-size: 0.83rem; color: var(--ink-faint); line-height: 1.45; }
+
+  footer { padding-block: 40px 56px; }
+  .foot { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: baseline; }
+</style>
+
+<header>
+  <div class="wrap head-inner">
+    <div class="badge-row">
+      <span class="wordmark">RUNGEN</span>
+      <span class="badge draft">Maquette — écrans non fonctionnels</span>
+      <span class="badge">Bloc 1 · Fondations</span>
+    </div>
+
+    <div class="head-grid">
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        <h1>Le suivi sportif,<br>sans rien vendre<br>aux élèves.</h1>
+        <p class="lede">
+          Une application de suivi sportif gratuite et open source, portée par l&rsquo;association
+          RUNGEN (loi 1901). Les élèves recrutés lors des interventions en établissement y ont
+          leur propre espace, entièrement séparé du grand public.
+        </p>
+      </div>
+
+      <dl class="facts">
+        <div class="fact"><dt>Plateformes</dt><dd>iOS et Android</dd></div>
+        <div class="fact"><dt>Hébergement</dt><dd>Union européenne</dd></div>
+        <div class="fact"><dt>Publicité</dt><dd>Aucune</dd></div>
+        <div class="fact"><dt>Données de santé</dt><dd>Aucune</dd></div>
+        <div class="fact"><dt>Prix</dt><dd>Gratuit</dd></div>
+      </dl>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Le principe</span>
+      <h2>Deux espaces qui ne se croisent jamais</h2>
+      <p class="lede">
+        Un compte appartient à un espace le jour de sa création, et n&rsquo;en change plus jamais.
+        C&rsquo;est ce qui permet de garantir qu&rsquo;un adulte inscrit librement sur l&rsquo;application ne
+        pourra jamais atteindre un élève.
+      </p>
+    </div>
+
+    <div class="spaces">
+      <div class="space public">
+        <span class="eyebrow">Espace public</span>
+        <p class="space-age">15<span> ans minimum</span></p>
+        <ul>
+          <li>Inscription libre avec un compte Google ou Apple</li>
+          <li>Visibilité au choix : publique, amis, ou privée</li>
+          <li>Ne voit jamais un membre RUNGEN, nulle part</li>
+        </ul>
+      </div>
+
+      <div class="wall">
+        <svg class="wall-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <rect x="4" y="10.5" width="16" height="10" rx="2" fill="none"></rect>
+          <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"></path>
+        </svg>
+        <p class="wall-label">Cloison<br>étanche</p>
+        <p class="wall-note">Appliquée par la base de données, pas seulement par l&rsquo;application</p>
+      </div>
+
+      <div class="space rungen">
+        <span class="eyebrow">Espace RUNGEN</span>
+        <p class="space-age">11<span> ans minimum</span></p>
+        <ul>
+          <li>Accès uniquement par code individuel, lié à une autorisation parentale signée</li>
+          <li>Profil privé tant que l&rsquo;élève est mineur</li>
+          <li>Visible des autres élèves, de ses profs d&rsquo;EPS et de l&rsquo;administrateur</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top: 18px;">
+      Dans les classements publics, un jeune RUNGEN apparaîtra sous la mention anonyme
+      « Athlète RUNGEN », sans aucune interaction possible avec le grand public.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Côté élève</span>
+      <h2>Le parcours d&rsquo;inscription</h2>
+      <p class="lede">
+        Cinq écrans, dans cet ordre. L&rsquo;élève ne peut pas en sauter un : chaque étape est
+        vérifiée par la base de données avant la suivante.
+      </p>
+    </div>
+
+    <div class="rail">
+      <article class="step">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <p class="p-title">RUNGEN</p>
+          <p class="p-sub">Loguer tes activités, suivre ta forme et relever des challenges entre amis.</p>
+          <div class="p-card">
+            <p style="font-weight:600;">Je m&rsquo;inscris</p>
+            <p class="p-sub">Espace public, à partir de 15 ans.</p>
+            <div class="p-btn">Continuer avec Google</div>
+          </div>
+          <div class="p-card">
+            <p style="font-weight:600;">J&rsquo;ai un code RUNGEN</p>
+            <p class="p-sub">Le code figure sur l&rsquo;autorisation parentale.</p>
+            <div class="p-btn ghost">Entrer mon code</div>
+          </div>
+          <div class="p-spacer"></div>
+        </div>
+        <div class="step-head"><span class="step-num">01</span><span class="step-title">Bienvenue</span></div>
+        <p class="step-note">Les deux portes sont visibles dès le départ. L&rsquo;élève prend celle de droite.</p>
+      </article>
+
+      <article class="step">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <p class="p-title">Ton code RUNGEN</p>
+          <p class="p-sub">Recopie le code imprimé sur l&rsquo;autorisation que tes parents ont signée. Il ne sert qu&rsquo;une fois.</p>
+          <div style="display:flex; flex-direction:column; gap:5px;">
+            <p class="p-label">Code</p>
+            <div class="p-input">KHTP4R9MDX</div>
+            <p class="p-sub" style="font-size:0.66rem;">10 caractères, sans les lettres O et I ni les chiffres 0 et 1.</p>
+          </div>
+          <div class="p-btn">Vérifier mon code</div>
+          <div class="p-spacer"></div>
+        </div>
+        <div class="step-head"><span class="step-num">02</span><span class="step-title">Le code</span></div>
+        <p class="step-note">L&rsquo;alphabet exclut O, I, 0 et 1 : impossible de se tromper en recopiant à la main.</p>
+      </article>
+
+      <article class="step">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <p class="p-title">Ce que l&rsquo;app fait avec tes données</p>
+          <p class="p-sub">À lire avant de créer ton compte.</p>
+          <div class="p-card">
+            <ul class="p-list">
+              <li>Ta date de naissance ne sert qu&rsquo;à vérifier ton âge : personne d&rsquo;autre que toi ne la voit.</li>
+              <li>Tant que tu es mineur, ton profil est privé.</li>
+              <li>Les gens de l&rsquo;espace public ne peuvent jamais voir ton compte.</li>
+              <li>On ne garde aucune donnée de santé : ni ton poids, ni ton cœur.</li>
+            </ul>
+          </div>
+          <div class="p-check"><span class="p-box">&#10003;</span><span>J&rsquo;ai compris et je suis d&rsquo;accord.</span></div>
+          <div class="p-btn">Continuer</div>
+          <div class="p-spacer"></div>
+        </div>
+        <div class="step-head"><span class="step-num">03</span><span class="step-title">Tes données</span></div>
+        <p class="step-note">Écrit pour être lu par un élève de 11 à 14 ans, pas par un juriste.</p>
+      </article>
+
+      <article class="step">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <p class="p-title">Choisis ton pseudo</p>
+          <p class="p-sub">C&rsquo;est le nom que les autres verront. Ne mets jamais ton vrai nom ni celui de ton collège.</p>
+          <div style="display:flex; flex-direction:column; gap:5px;">
+            <p class="p-label">Pseudo</p>
+            <div class="p-input plain">coureur_du_95</div>
+          </div>
+          <div class="p-btn">Créer mon compte</div>
+          <div class="p-spacer"></div>
+        </div>
+        <div class="step-head"><span class="step-num">04</span><span class="step-title">Le pseudo</span></div>
+        <p class="step-note">Filtré par une liste de mots interdits. Le vrai nom de l&rsquo;élève n&rsquo;entre jamais dans l&rsquo;application.</p>
+      </article>
+
+      <article class="step">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <p class="p-title">Tes sports</p>
+          <p class="p-sub">Choisis ceux que tu pratiques. Tu pourras en ajouter quand tu veux.</p>
+          <p class="p-label">Distance</p>
+          <div class="p-chips">
+            <span class="p-chip on">Course à pied</span>
+            <span class="p-chip">Trail</span>
+            <span class="p-chip on">Natation</span>
+            <span class="p-chip">VTT</span>
+          </div>
+          <p class="p-label">Durée</p>
+          <div class="p-chips">
+            <span class="p-chip on">Handball</span>
+            <span class="p-chip">Escalade</span>
+            <span class="p-chip">Danse</span>
+            <span class="p-chip">Boxe</span>
+          </div>
+          <div class="p-spacer"></div>
+        </div>
+        <div class="step-head"><span class="step-num">05</span><span class="step-title">Les sports</span></div>
+        <p class="step-note">31 sports au catalogue, et l&rsquo;élève peut créer le sien s&rsquo;il manque.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Avant l&rsquo;application</span>
+      <h2>Le code passe par le papier</h2>
+      <p class="lede">
+        Un lot de codes est généré par classe et imprimé, un par autorisation. Le nom de l&rsquo;élève
+        reste sur le papier : il n&rsquo;entre jamais dans l&rsquo;application.
+      </p>
+    </div>
+
+    <div class="code-demo">
+      <div class="paper">
+        <p class="paper-title">Autorisation parentale</p>
+        <p class="note">Collège Jean Moulin · classe 4<sup>e</sup> B</p>
+        <div class="paper-line"></div>
+        <div class="paper-line"></div>
+        <div class="paper-line"></div>
+        <p class="note">Je soussigné(e) …, responsable légal(e) de l&rsquo;élève …, autorise la création d&rsquo;un compte RUNGEN.</p>
+        <div class="paper-sig"></div>
+        <div class="code-box">
+          <p class="code-label">Code personnel</p>
+          <p class="code-value">KHTP4R9MDX</p>
+        </div>
+      </div>
+
+      <div class="states">
+        <div class="state">
+          <span class="pill wait">En attente</span>
+          <p>Le code est imprimé mais le papier signé n&rsquo;est pas revenu. L&rsquo;élève qui le saisit est refusé.</p>
+        </div>
+        <div class="state">
+          <span class="pill live">Actif</span>
+          <p>L&rsquo;administrateur a touché « Autorisation reçue » sur son téléphone. Le compte peut être créé.</p>
+        </div>
+        <div class="state">
+          <span class="pill used">Utilisé</span>
+          <p>Le code a servi. Il est consommé définitivement et ne peut plus créer d&rsquo;autre compte.</p>
+        </div>
+        <p class="note">
+          Code perdu ? L&rsquo;ancien est désactivé et un nouveau est généré. Accord parental retiré ?
+          Le code retrouvé sur le papier permet de supprimer le compte correspondant.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Côté professeur</span>
+      <h2>Ce qu&rsquo;un prof d&rsquo;EPS voit, et ne voit pas</h2>
+      <p class="lede">
+        Un compte encadrant est créé avec son propre code, doit être majeur, et exige une
+        double authentification à chaque session avant d&rsquo;avoir le moindre pouvoir.
+      </p>
+    </div>
+
+    <div class="cols">
+      <div class="panel">
+        <h3>Les élèves de son établissement</h3>
+        <p>Les adhésions de son collège ou lycée, classe par classe. Pseudos et sports, jamais les dates de naissance.</p>
+      </div>
+      <div class="panel">
+        <h3>Les codes de son établissement</h3>
+        <p>L&rsquo;état de chaque code de ses classes : en attente, actif, utilisé ou désactivé.</p>
+      </div>
+      <div class="panel nope">
+        <h3>Pas les autres établissements</h3>
+        <p>Aucun élève, aucun code, aucune classe d&rsquo;un autre collège. La limite est posée en base, pas dans l&rsquo;écran.</p>
+      </div>
+      <div class="panel nope">
+        <h3>Pas le support</h3>
+        <p>Les messages que les élèves envoient à l&rsquo;association ne sont lisibles que par l&rsquo;administrateur.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Garanties</span>
+      <h2>Les règles qu&rsquo;on ne peut pas contourner</h2>
+      <p class="lede">
+        Chacune est appliquée par la base de données elle-même. L&rsquo;application ne fait que les
+        refléter : même une version modifiée de l&rsquo;app ne pourrait pas passer outre.
+      </p>
+    </div>
+
+    <ul class="rule-list">
+      <li class="rule">
+        <span class="rule-mark" aria-hidden="true">&#10003;</span>
+        <div><b>Un mineur est toujours en profil privé.</b><span>Le réglage de visibilité est verrouillé jusqu&rsquo;à 18 ans. Il n&rsquo;apparaît dans aucune recherche.</span></div>
+      </li>
+      <li class="rule">
+        <span class="rule-mark" aria-hidden="true">&#10003;</span>
+        <div><b>La date de naissance n&rsquo;est lisible que par son propriétaire.</b><span>Elle sert à calculer l&rsquo;âge, et n&rsquo;est jamais exposée aux autres utilisateurs. Elle n&rsquo;est pas modifiable après l&rsquo;inscription.</span></div>
+      </li>
+      <li class="rule">
+        <span class="rule-mark" aria-hidden="true">&#10003;</span>
+        <div><b>Aucune donnée de santé.</b><span>Ni poids, ni fréquence cardiaque. Le projet n&rsquo;en collecte pas, y compris pour les adultes.</span></div>
+      </li>
+      <li class="rule">
+        <span class="rule-mark" aria-hidden="true">&#10003;</span>
+        <div><b>Les messages de support sont définitifs.</b><span>Ni l&rsquo;élève ni l&rsquo;administrateur ne peuvent modifier ou supprimer un message envoyé. L&rsquo;administrateur ne peut que répondre.</span></div>
+      </li>
+      <li class="rule">
+        <span class="rule-mark" aria-hidden="true">&#10003;</span>
+        <div><b>Le compte est supprimable depuis l&rsquo;application.</b><span>Par l&rsquo;élève lui-même, ou par l&rsquo;administrateur en cas de retrait de l&rsquo;accord parental. Suppression complète, en cascade.</span></div>
+      </li>
+      <li class="rule">
+        <span class="rule-mark" aria-hidden="true">&#10003;</span>
+        <div><b>Aucun ciblage publicitaire.</b><span>Les futurs challenges de partenaires excluront alcool, jeux d&rsquo;argent, boissons énergisantes et malbouffe, avec un interrupteur « visible par les jeunes » par challenge.</span></div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">État réel du projet</span>
+      <h2>Où en est le développement</h2>
+      <p class="lede">
+        La V1 est découpée en six blocs. Le premier — les fondations — est écrit et testé ;
+        les écrans ci-dessus sont des maquettes de ce bloc, pas une application installable.
+      </p>
+    </div>
+
+    <div class="status">
+      <div class="stat">
+        <p class="stat-k">1</p>
+        <p class="stat-l">Fondations</p>
+        <p class="stat-n">Base de données, règles de sécurité et écrans écrits. Reste la connexion Google et Apple.</p>
+      </div>
+      <div class="stat">
+        <p class="stat-k">2</p>
+        <p class="stat-l">Log d&rsquo;activité</p>
+        <p class="stat-n">Saisie manuelle d&rsquo;une séance et historique. À venir.</p>
+      </div>
+      <div class="stat">
+        <p class="stat-k">3&ndash;6</p>
+        <p class="stat-l">Stats, social, challenges</p>
+        <p class="stat-n">Forme et prédictions, amis et fil, clubs et challenges, partage. À venir.</p>
+      </div>
+    </div>
+
+    <p class="note" style="margin-top: 20px;">
+      Hors V1 : suivi GPS en direct et import de fichiers GPX (prévus en V1.1). Avant toute
+      intervention en établissement : accord du chef d&rsquo;établissement et analyse d&rsquo;impact RGPD validée.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <p class="note">
+      <span class="wordmark" style="font-size: 1rem;">RUNGEN</span> — association loi 1901.
+      Application open source, identifiant <span class="mono">fr.rungen.app</span>.
+    </p>
+    <p class="note">Maquette de présentation · bloc 1</p>
+  </div>
+</footer>
