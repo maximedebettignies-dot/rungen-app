@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { messageErreur } from '@/lib/errors';
 import { Bouton, Carte, Champ, Chargement, Ecran, Erreur, espace, Paragraphe, SousTitre, Titre } from '@/ui';
+import { QrCode } from '@/ui/qr-code';
 
 type Etape =
   | { nom: 'chargement' }
-  | { nom: 'enrolement'; facteur: string; qr: string; secret: string }
+  | { nom: 'enrolement'; facteur: string; uri: string; secret: string }
   | { nom: 'verification'; facteur: string }
   | { nom: 'ouvert' };
 
@@ -62,7 +63,7 @@ export function DoubleAuth({ children }: { children: React.ReactNode }) {
     setEtape({
       nom: 'enrolement',
       facteur: nouveau.id,
-      qr: nouveau.totp.qr_code,
+      uri: nouveau.totp.uri,
       secret: nouveau.totp.secret,
     });
   }, []);
@@ -99,12 +100,7 @@ export function DoubleAuth({ children }: { children: React.ReactNode }) {
             1Password…), puis saisis le code à 6 chiffres qu&apos;elle affiche.
           </SousTitre>
           <View style={{ alignItems: 'center', gap: espace.sm }}>
-            <Image
-              source={{ uri: etape.qr }}
-              style={{ width: 220, height: 220, backgroundColor: '#FFFFFF' }}
-              accessibilityLabel="QR code de configuration"
-              accessibilityIgnoresInvertColors
-            />
+            <QrCode valeur={etape.uri} />
           </View>
           <Carte>
             <Paragraphe>Impossible de scanner ?</Paragraphe>
