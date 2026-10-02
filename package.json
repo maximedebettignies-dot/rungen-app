@@ -51,12 +51,13 @@
     "lint": "expo lint",
     "test:db": "bash supabase/tests/run.sh",
     "typecheck": "tsc --noEmit",
-    "test:unit": "node --experimental-strip-types --test src/lib/*.test.ts",
+    "test:unit": "node --experimental-strip-types --test src/lib/*.test.ts scripts/*.test.ts",
     "db:link": "supabase link",
     "db:push": "supabase db push",
     "db:diff": "supabase db diff --linked",
     "types:gen": "supabase gen types typescript --linked > src/lib/database.generated.ts",
-    "db:preflight": "bash supabase/preflight/run.sh"
+    "db:preflight": "bash supabase/preflight/run.sh",
+    "db:sauvegarde": "node --experimental-strip-types scripts/sauvegarde.ts"
   },
   "private": true
 }
