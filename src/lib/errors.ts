@@ -36,7 +36,6 @@ const MESSAGES: Record<string, string> = {
   date_future: 'Cette séance est dans le futur.',
   date_trop_ancienne: 'On ne peut loguer que les 30 derniers jours.',
   duree_invalide: 'La durée doit être comprise entre 1 minute et 24 heures.',
-  distance_requise: 'Ce sport se mesure en distance : indique combien de kilomètres.',
   distance_interdite: "Ce sport se mesure en durée : la distance ne s'applique pas.",
   distance_invalide: 'Cette distance ne semble pas réaliste.',
   note_trop_longue: 'La note ne peut pas dépasser 280 caractères.',
@@ -58,6 +57,20 @@ const PAR_CODE_SQL: Record<string, string> = {
 
 type ErreurBase = { message?: string; code?: string; details?: string | null };
 
+const PANNE_RESEAU = /Network request failed|Failed to fetch|fetch failed|timeout|ERR_NETWORK/i;
+
+/**
+ * La requête n'a pas atteint le serveur.
+ *
+ * C'est le seul cas où une séance mérite d'être gardée pour plus tard : un refus
+ * de la base se reproduirait à chaque essai. Voir `src/lib/file-attente.ts`.
+ */
+export function estPanneReseau(error: unknown): boolean {
+  if (!error) return false;
+  const e = error as ErreurBase;
+  return PANNE_RESEAU.test(typeof e.message === 'string' ? e.message : '');
+}
+
 /** Message français pour une erreur remontée par Supabase (ou par le réseau). */
 export function messageErreur(error: unknown): string {
   if (!error) return 'Une erreur est survenue.';
@@ -70,9 +83,7 @@ export function messageErreur(error: unknown): string {
     if (brut.includes(cle) || e.details?.includes(cle)) return MESSAGES[cle];
   }
 
-  if (/Network request failed|Failed to fetch|fetch failed/i.test(brut)) {
-    return 'Connexion internet requise.';
-  }
+  if (PANNE_RESEAU.test(brut)) return 'Connexion internet requise.';
   if (e.code && PAR_CODE_SQL[e.code]) return PAR_CODE_SQL[e.code];
 
   return 'Une erreur est survenue. Réessaie dans un instant.';

@@ -1,4 +1,16 @@
+import { File, Paths } from 'expo-file-system';
 import { supabase } from './supabase';
+import { estPanneReseau } from './errors.ts';
+import {
+  ajouter,
+  deserialiser,
+  identifiantSeance,
+  retirer,
+  serialiser,
+  suiteDeSynchro,
+  type ChargeSeance,
+  type SeanceEnAttente,
+} from './file-attente.ts';
 import type { Activity, Effort, PaceUnit, SportFamily } from './database';
 
 /** Une séance accompagnée du sport auquel elle se rattache. */
@@ -68,4 +80,90 @@ export function cumul(seances: SeanceAffichee[]) {
     }),
     { distanceM: 0, dureeS: 0, nombre: 0 },
   );
+}
+
+// ---------------------------------------------------------------------------
+// Enregistrement : réseau d'abord, disque en secours
+//
+// Spec : docs/specs/2026-10-07-chrono-et-hors-ligne-design.md
+// ---------------------------------------------------------------------------
+
+/** Dans `document` et non `cache` : le système ne doit pas effacer ça pour faire de la place. */
+function fichierFile(): File {
+  return new File(Paths.document, 'seances-en-attente.json');
+}
+
+async function lireFile(): Promise<SeanceEnAttente[]> {
+  try {
+    const f = fichierFile();
+    return f.exists ? deserialiser(await f.text()) : [];
+  } catch {
+    // Disque illisible : on repart d'une file vide plutôt que de bloquer l'app.
+    return [];
+  }
+}
+
+async function ecrireFile(file: readonly SeanceEnAttente[]): Promise<void> {
+  const f = fichierFile();
+  if (!f.exists) f.create({ overwrite: true });
+  f.write(serialiser(file));
+}
+
+export async function nombreEnAttente(): Promise<number> {
+  return (await lireFile()).length;
+}
+
+export type ResultatEnregistrement =
+  | { statut: 'envoyee' }
+  /** Gardée sur le téléphone : elle partira au prochain retour du réseau. */
+  | { statut: 'en_attente' }
+  | { statut: 'refusee'; error: unknown };
+
+/**
+ * Enregistre une séance, en ligne si possible, sur le disque sinon.
+ *
+ * L'identifiant est posé ici, avant le premier envoi : c'est ce qui rend un
+ * renvoi inoffensif.
+ */
+export async function enregistrerSeance(charge: ChargeSeance): Promise<ResultatEnregistrement> {
+  const id = identifiantSeance();
+  const { error } = await supabase.from('activities').insert({ id, ...charge });
+  if (!error) return { statut: 'envoyee' };
+
+  if (!estPanneReseau(error)) return { statut: 'refusee', error };
+
+  await ecrireFile(ajouter(await lireFile(), { id, creeA: Date.now(), charge }));
+  return { statut: 'en_attente' };
+}
+
+export type Synchronisation = { envoyees: number; abandonnees: SeanceEnAttente[] };
+
+/**
+ * Vide la file. À appeler au démarrage et au retour au premier plan.
+ *
+ * On s'arrête à la première panne de réseau : insister ne ferait qu'épuiser la
+ * batterie, et l'ordre vécu par l'élève est préservé. Une séance refusée par la
+ * base sort de la file — l'y laisser reviendrait à la représenter indéfiniment —
+ * et elle est rendue à l'appelant, qui doit le dire à l'utilisateur.
+ */
+export async function synchroniserFile(): Promise<Synchronisation> {
+  let file = await lireFile();
+  if (file.length === 0) return { envoyees: 0, abandonnees: [] };
+
+  let envoyees = 0;
+  const abandonnees: SeanceEnAttente[] = [];
+
+  for (const seance of file) {
+    const { error } = await supabase.from('activities').insert({ id: seance.id, ...seance.charge });
+    const suite = error ? suiteDeSynchro(error) : 'reussi';
+
+    if (suite === 'reessayer') break;
+    if (suite === 'abandonner') abandonnees.push(seance);
+    else envoyees += 1;
+
+    file = retirer(file, seance.id);
+  }
+
+  await ecrireFile(file);
+  return { envoyees, abandonnees };
 }

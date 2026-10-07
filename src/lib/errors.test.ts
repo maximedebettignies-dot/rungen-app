@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { messageErreur, messageStatutCode } from './errors.ts';
+import { estPanneReseau, messageErreur, messageStatutCode } from './errors.ts';
 
 test('messageErreur : règle métier levée par un trigger', () => {
   assert.equal(
@@ -50,8 +50,16 @@ test('messageStatutCode : un message par statut de code', () => {
 
 test('messageErreur : règles du bloc 2', () => {
   assert.match(messageErreur({ message: 'date_trop_ancienne' }), /30 derniers jours/);
-  assert.match(messageErreur({ message: 'distance_requise' }), /combien de kilomètres/);
+  assert.match(messageErreur({ message: 'distance_interdite' }), /se mesure en durée/);
   assert.match(messageErreur({ message: 'activite_verrouillee' }), /défi terminé/);
+});
+
+test('estPanneReseau : seule une requête qui n’atteint pas le serveur mérite un réessai', () => {
+  assert.equal(estPanneReseau({ message: 'Network request failed' }), true);
+  assert.equal(estPanneReseau({ message: 'fetch failed' }), true);
+  // Un refus de la base se reproduirait à chaque essai : ce n'est pas du réseau.
+  assert.equal(estPanneReseau({ message: 'date_trop_ancienne', code: '23514' }), false);
+  assert.equal(estPanneReseau(null), false);
 });
 
 test('messageErreur : la contrainte du sport unique est traduite', () => {
