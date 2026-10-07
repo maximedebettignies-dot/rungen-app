@@ -69,10 +69,11 @@ values (auth.uid(), (select course from refs), current_date - 30, 1800, 5000);
 -- ---------------------------------------------------------------------------
 -- 3. Distance et famille du sport
 -- ---------------------------------------------------------------------------
-select pg_temp.expect_error(
-  $$insert into public.activities (user_id, sport_id, performed_on, duration_s)
-    values (auth.uid(), (select course from refs), current_date, 1800)$$,
-  'distance_requise');
+-- La distance n'est plus exigée depuis le 07/10/2026 : le projet se cadre sur
+-- le temps d'activité, et une séance chronométrée ne connaît pas sa distance.
+-- Voir supabase/tests/bloc2bis_chrono_test.sql.
+insert into public.activities (user_id, sport_id, performed_on, duration_s)
+values (auth.uid(), (select course from refs), current_date, 1800);
 
 select pg_temp.expect_error(
   $$insert into public.activities (user_id, sport_id, performed_on, duration_s, distance_m)

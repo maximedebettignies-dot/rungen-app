@@ -59,6 +59,8 @@ export type SupportThread = Tables['support_threads']['Row'];
 export type SupportMessage = Tables['support_messages']['Row'];
 export type Activity = Tables['activities']['Row'];
 export type Effort = Enums['effort'];
+/** Comment la séance a été produite : saisie après coup, ou chronométrée dans l'app. */
+export type ActivitySource = Enums['activity_source'];
 
 /** Carte de profil visible par les autres : jamais la date de naissance. */
 export type PublicProfile = PublicGenere['Views']['public_profiles']['Row'];

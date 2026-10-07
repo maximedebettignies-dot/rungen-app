@@ -1,13 +1,35 @@
 # Chronomètre et mode hors-ligne : spec de conception
 
-Statut : **à valider avec Maxime**. Écrite le 07/10/2026, en réponse à deux manques
-constatés à l'usage : on ne peut que saisir une séance après coup, et une saisie sans
-réseau est perdue.
+Statut : **validée le 07/10/2026**. Écrite en réponse à deux manques constatés à
+l'usage : on ne peut que saisir une séance après coup, et une saisie sans réseau est
+perdue.
 
 ## Objectif
 
 Permettre de **lancer une séance en direct** depuis l'app, et faire qu'**aucune saisie ne
 se perde** quand le réseau manque.
+
+## Le cadrage : le temps, pas la distance
+
+Le projet se réfère aux recommandations de l'Organisation mondiale de la santé. Les
+chiffres exacts, parce qu'ils seront cités devant des professeurs :
+
+| Public | Recommandation OMS (2020) |
+|---|---|
+| **5 à 17 ans** — le public de l'espace RUNGEN | **60 minutes par jour** d'activité modérée à soutenue |
+| 18 à 64 ans | 150 à 300 minutes par semaine d'activité modérée |
+
+Les « 30 minutes par jour » souvent citées correspondent au bas de la fourchette adulte.
+**Pour un collégien, la référence est le double.** Annoncer 30 minutes à un établissement
+serait se tromper de moitié sur sa propre cible.
+
+L'OMS a par ailleurs **supprimé en 2020 le seuil des 10 minutes minimum** : chaque minute
+compte, même fractionnée. Un chronomètre de sept minutes entre deux cours a donc une
+valeur reconnue — ce qui justifie à la fois le chronomètre et le minimum de 60 secondes
+déjà en base.
+
+Conséquence directe sur cette spec : **ce qui compte d'abord, c'est la durée**. La
+distance est un complément utile, jamais une condition.
 
 ## Ce que ce n'est pas
 
@@ -103,31 +125,36 @@ Une séance synchronisée passe par les mêmes déclencheurs que les autres : fe
 saisie, distance selon la famille du sport, bornes de durée, filtrage de la note. Si la
 base la refuse, l'app le dit et garde la séance modifiable plutôt que de la jeter.
 
-## Points à trancher
+## Décisions (validées le 07/10/2026)
 
 **1. Distance d'une séance chronométrée.** Le chronomètre donne la durée, pas la
 distance. Pour un sport de famille `distance`, l'élève devra donc saisir une distance
 qu'il ne connaît pas forcément. La spec du bloc 2 avait tranché « distance obligatoire »
 (point ouvert 2.5). Le chronomètre rouvre la question.
 
-> **Recommandation** : autoriser une séance chronométrée **sans distance** pour les sports
-> de famille `distance`. L'allure ne s'affiche alors pas, et la séance ne compte pas dans
-> les records de distance — mais elle compte dans le volume horaire et la charge. Mieux
-> vaut une séance incomplète qu'une distance inventée. Cela demande une migration, la
-> règle étant appliquée en base.
+> **Retenu, et élargi** : la distance devient facultative **pour toute séance**, pas
+> seulement pour les séances chronométrées. Deux raisons. D'abord le cadrage ci-dessus :
+> si la référence est le temps d'activité, la distance ne peut pas être une condition
+> d'enregistrement. Ensuite la cohérence : une règle qui ne s'appliquerait qu'au
+> chronomètre pousserait à lancer un chronomètre pour contourner la saisie de distance.
+>
+> Sans distance, l'allure ne s'affiche pas et la séance n'entre pas dans les records de
+> distance ; elle compte dans le volume et dans la charge. Cela rouvre le point ouvert 2.5
+> du bloc 2, qui prévoyait explicitement cette réouverture « si les premiers retours le
+> demandent ».
 
 **2. Distinguer une séance chronométrée d'une séance saisie.** Une colonne `source`
 (`saisie` | `chrono`) permettrait au professeur de voir lesquelles ont été mesurées dans
 l'app.
 
-> **Recommandation** : oui. Cela ne prouve rien — un chronomètre se lance et s'oublie —
-> mais c'est une information honnête, affichée telle quelle, sans prétendre à une
-> vérification. Migration courte.
+> **Retenu**. Colonne `source` (`saisie` | `chrono`), `saisie` par défaut. Cela ne prouve
+> rien — un chronomètre se lance et s'oublie — mais c'est une information honnête,
+> affichée telle quelle, sans prétendre à une vérification.
 
 **3. Pause.**
 
-> **Recommandation** : oui, avec reprise. Un feu rouge, un lacet, une pause boisson. Sans
-> pause, l'élève arrête et relance, et se retrouve avec deux séances.
+> **Retenu**, avec reprise. Un feu rouge, un lacet, une pause boisson. Sans pause, l'élève
+> arrête et relance, et se retrouve avec deux séances.
 
 ## Tests
 

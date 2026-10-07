@@ -27,6 +27,7 @@ export type Database = {
           locked_at: string | null
           note: string | null
           performed_on: string
+          source: Database["public"]["Enums"]["activity_source"]
           sport_id: number | null
           updated_at: string
           user_id: string
@@ -41,6 +42,7 @@ export type Database = {
           locked_at?: string | null
           note?: string | null
           performed_on: string
+          source?: Database["public"]["Enums"]["activity_source"]
           sport_id?: number | null
           updated_at?: string
           user_id: string
@@ -55,6 +57,7 @@ export type Database = {
           locked_at?: string | null
           note?: string | null
           performed_on?: string
+          source?: Database["public"]["Enums"]["activity_source"]
           sport_id?: number | null
           updated_at?: string
           user_id?: string
@@ -605,6 +608,7 @@ export type Database = {
       storage_owner: { Args: { chemin: string }; Returns: string }
     }
     Enums: {
+      activity_source: "saisie" | "chrono"
       effort: "facile" | "correct" | "dur"
       invite_kind: "eleve" | "prof_eps"
       invite_status: "cree" | "actif" | "utilise" | "desactive"
