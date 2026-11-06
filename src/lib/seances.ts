@@ -1,6 +1,7 @@
 import { File, Paths } from 'expo-file-system';
 import { supabase } from './supabase';
 import { estPanneReseau } from './errors.ts';
+import { demarrer, type Chrono } from './chrono.ts';
 import {
   ajouter,
   deserialiser,
@@ -166,4 +167,59 @@ export async function synchroniserFile(): Promise<Synchronisation> {
 
   await ecrireFile(file);
   return { envoyees, abandonnees };
+}
+
+// ---------------------------------------------------------------------------
+// Séance en cours de chronométrage
+// ---------------------------------------------------------------------------
+
+/** Le sport choisi, conservé avec le chronomètre pour qu'une reprise soit complète. */
+export type SportChoisi = {
+  cle: string;
+  nom: string;
+  famille: SportFamily;
+  sportId: number | null;
+  customId: string | null;
+};
+
+export type SeanceEnCours = { sport: SportChoisi; chrono: Chrono };
+
+function fichierEnCours(): File {
+  return new File(Paths.document, 'seance-en-cours.json');
+}
+
+/**
+ * Relit la séance que l'app chronométrait quand elle s'est arrêtée.
+ *
+ * Le système tue les applications en arrière-plan sans prévenir. Sans cette
+ * relecture, un élève qui range son téléphone pendant sa course perdrait sa séance.
+ */
+export async function lireSeanceEnCours(): Promise<SeanceEnCours | null> {
+  try {
+    const f = fichierEnCours();
+    if (!f.exists) return null;
+    const brut: unknown = JSON.parse(await f.text());
+    if (typeof brut !== 'object' || brut === null) return null;
+    const e = brut as Partial<SeanceEnCours>;
+    if (!e.sport || typeof e.chrono?.demarreA !== 'number') return null;
+    return e as SeanceEnCours;
+  } catch {
+    return null;
+  }
+}
+
+export async function ecrireSeanceEnCours(seance: SeanceEnCours): Promise<void> {
+  const f = fichierEnCours();
+  if (!f.exists) f.create({ overwrite: true });
+  f.write(JSON.stringify(seance));
+}
+
+export async function effacerSeanceEnCours(): Promise<void> {
+  const f = fichierEnCours();
+  if (f.exists) f.delete();
+}
+
+/** Démarre un chronomètre pour ce sport et le range sur disque. */
+export async function lancerChrono(sport: SportChoisi): Promise<void> {
+  await ecrireSeanceEnCours({ sport, chrono: demarrer(Date.now()) });
 }

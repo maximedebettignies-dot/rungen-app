@@ -13,6 +13,7 @@ export default function ActiviteLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: 'Loguer une séance' }} />
+      <Stack.Screen name="chrono" options={{ title: 'Chronomètre', gestureEnabled: false }} />
       <Stack.Screen name="historique" options={{ title: 'Mon historique' }} />
       <Stack.Screen name="[id]" options={{ title: 'Séance' }} />
     </Stack>

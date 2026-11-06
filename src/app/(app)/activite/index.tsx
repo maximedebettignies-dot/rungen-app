@@ -1,11 +1,17 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { messageErreur } from '@/lib/errors';
 import { enFrancais, versISO } from '@/lib/date';
 import { datesProposees, lireDistanceKm, lireDureeMinutes } from '@/lib/activite';
-import { LIBELLE_EFFORT } from '@/lib/seances';
+import {
+  LIBELLE_EFFORT,
+  enregistrerSeance,
+  lancerChrono,
+  nombreEnAttente,
+  synchroniserFile,
+} from '@/lib/seances';
 import type { Effort, SportFamily } from '@/lib/database';
 import { useSession } from '@/lib/session';
 import {
@@ -35,6 +41,10 @@ const EFFORTS: Effort[] = ['facile', 'correct', 'dur'];
 export default function LoguerSeance() {
   const router = useRouter();
   const { session } = useSession();
+  // Renseignés par le chronomètre quand il rend la main.
+  const params = useLocalSearchParams<{ dureeS?: string; sportCle?: string; modifiable?: string }>();
+  const venuDuChrono = Boolean(params.dureeS);
+  const dureeFigee = venuDuChrono && params.modifiable !== '1';
 
   const [favoris, setFavoris] = useState<Favori[]>([]);
   const [chargement, setChargement] = useState(true);
@@ -46,7 +56,8 @@ export default function LoguerSeance() {
   const [note, setNote] = useState('');
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState(false);
-  const [enregistre, setEnregistre] = useState(false);
+  const [enregistre, setEnregistre] = useState<'envoyee' | 'en_attente' | null>(null);
+  const [enAttente, setEnAttente] = useState(0);
 
   const charger = useCallback(async () => {
     if (!session) return;
@@ -74,13 +85,26 @@ export default function LoguerSeance() {
     });
 
     setFavoris(liste);
-    setChoisi((actuel) => actuel ?? liste[0] ?? null);
+    setChoisi((actuel) => actuel ?? liste.find((f) => f.cle === params.sportCle) ?? liste[0] ?? null);
+    if (params.dureeS) setDuree(String(Math.round(Number(params.dureeS) / 60)));
     setChargement(false);
-  }, [session]);
+  }, [session, params.sportCle, params.dureeS]);
 
   useFocusEffect(
     useCallback(() => {
       charger();
+      // Le retour sur cet écran est le bon moment pour vider la file : l'app
+      // vient de reprendre la main, le réseau est peut-être revenu.
+      synchroniserFile()
+        .then(({ abandonnees }) => {
+          if (abandonnees.length > 0) {
+            setErreur(
+              `${abandonnees.length} séance(s) en attente ont été refusées par le serveur et retirées.`,
+            );
+          }
+          return nombreEnAttente();
+        })
+        .then(setEnAttente);
     }, [charger]),
   );
 
@@ -110,7 +134,7 @@ export default function LoguerSeance() {
     }
 
     setEnCours(true);
-    const { error } = await supabase.from('activities').insert({
+    const resultat = await enregistrerSeance({
       user_id: session.user.id,
       sport_id: choisi.sportId,
       custom_sport_id: choisi.customId,
@@ -119,23 +143,28 @@ export default function LoguerSeance() {
       distance_m: distanceM,
       effort,
       note: note.trim() || null,
+      source: venuDuChrono ? 'chrono' : 'saisie',
     });
     setEnCours(false);
 
-    if (error) {
-      setErreur(messageErreur(error));
+    if (resultat.statut === 'refusee') {
+      setErreur(messageErreur(resultat.error));
       return;
     }
-    setEnregistre(true);
+    setEnAttente(await nombreEnAttente());
+    setEnregistre(resultat.statut);
   }
 
   function recommencer() {
-    setEnregistre(false);
+    setEnregistre(null);
     setDistance('');
     setDuree('');
     setEffort(null);
     setNote('');
     setDate(new Date());
+    // Sans cela, les paramètres laissés par le chronomètre survivraient : la
+    // séance suivante serait figée sur la durée mesurée et marquée « chrono ».
+    router.replace('/(app)/activite');
   }
 
   if (chargement) return <Chargement />;
@@ -143,8 +172,12 @@ export default function LoguerSeance() {
   if (enregistre) {
     return (
       <Ecran>
-        <Titre>Séance enregistrée</Titre>
-        <SousTitre>Elle apparaît dans ton historique et compte dans tes totaux.</SousTitre>
+        <Titre>{enregistre === 'envoyee' ? 'Séance enregistrée' : 'Séance gardée sur ton téléphone'}</Titre>
+        <SousTitre>
+          {enregistre === 'envoyee'
+            ? 'Elle apparaît dans ton historique et compte dans tes totaux.'
+            : "Pas de réseau pour l'instant. Elle partira toute seule dès que la connexion reviendra — tu n'as rien à faire."}
+        </SousTitre>
         <Bouton titre="Voir mon historique" onPress={() => router.push('/(app)/activite/historique')} />
         <Bouton titre="Loguer une autre séance" variante="secondaire" onPress={recommencer} />
       </Ecran>
@@ -171,11 +204,33 @@ export default function LoguerSeance() {
 
   return (
     <Ecran>
-      <Titre>Loguer une séance</Titre>
-      <SousTitre>
-        Saisie manuelle. Le suivi GPS et l&apos;import de fichiers GPX viendront plus tard.
-      </SousTitre>
+      <Titre>{venuDuChrono ? 'Ta séance' : 'Loguer une séance'}</Titre>
       <Erreur>{erreur}</Erreur>
+
+      {enAttente > 0 ? (
+        <Carte>
+          <SousTitre>
+            {enAttente === 1
+              ? "1 séance attend d'être envoyée. Elle partira dès le retour du réseau."
+              : `${enAttente} séances attendent d'être envoyées. Elles partiront dès le retour du réseau.`}
+          </SousTitre>
+        </Carte>
+      ) : null}
+
+      {venuDuChrono ? null : (
+        <Bouton
+          titre="Lancer le chronomètre"
+          variante="secondaire"
+          onPress={async () => {
+            if (!choisi) {
+              setErreur('Choisis un sport pour commencer.');
+              return;
+            }
+            await lancerChrono(choisi);
+            router.push('/(app)/activite/chrono');
+          }}
+        />
+      )}
 
       <SousTitre>Sport</SousTitre>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: espace.sm }}>
@@ -237,6 +292,8 @@ export default function LoguerSeance() {
             keyboardType="number-pad"
             maxLength={4}
             placeholder="42"
+            editable={!dureeFigee}
+            aide={dureeFigee ? 'Mesurée au chronomètre' : undefined}
           />
         </View>
         {besoinDistance ? (
