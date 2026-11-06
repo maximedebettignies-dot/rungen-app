@@ -1,6 +1,7 @@
 # Restructuration RPG : ce qu'il faut trancher avant de coder
 
-Statut : **à valider avec Maxime**. Écrit le 06/11/2026, à partir de la direction
+Statut : **R1, R2 et le refus de tout mécanisme punitif validés le 06/11/2026.**
+Écrit le 06/11/2026, à partir de la direction
 donnée : quêtes quotidiennes, expérience, niveaux, personnage, boutique et bons de
 réduction partenaires.
 
@@ -34,7 +35,29 @@ central, mais cessent d'être l'écran d'arrivée.
 
 ---
 
-## R1. Les bons de réduction partenaires — la décision la plus lourde
+## R1. Récompenses internes uniquement — **tranché**
+
+**Décision du 06/11/2026 : monnaie fictive et récompenses internes à l'application. Pas
+de bons partenaires, pas de publicité, pas d'achat en argent réel.**
+
+Ce que ce choix fait disparaître, d'un coup :
+
+- l'examen renforcé des stores sur le commerce et la publicité de tiers dans une app
+  orientée enfants ;
+- une communication à des tiers à documenter dans l'AIPD, et le contrat qui va avec ;
+- toute gestion de paiement, et la question du parent qui découvre un débit ;
+- la question « qui paie, et pourquoi ? » posée par un chef d'établissement.
+
+Une monnaie fictive n'a de valeur que dans l'app. Elle motive autant à cet âge, et elle
+ne crée aucune obligation nouvelle. C'est le meilleur rapport entre effet et coût
+réglementaire de toute cette restructuration.
+
+Un partenariat avec des commerces reste possible plus tard, **pour l'espace public
+uniquement (15 ans et plus)**, et fera l'objet de sa propre décision. Il est hors V1.
+
+### L'analyse qui a conduit là (conservée)
+
+
 
 Des bons ayant une valeur réelle, gagnés par des enfants de 11 à 14 ans, ce n'est pas
 une fonctionnalité de plus. C'est un changement de nature de l'application.
@@ -64,7 +87,7 @@ Trois conséquences, aucune négociable :
 
 ---
 
-## R2. Le plafond quotidien — ce qui empêche le jeu de se retourner contre toi
+## R2. Le plafond quotidien — **tranché : retenu**
 
 « Plus tu en fais, plus tu gagnes » appliqué sans limite à des adolescents, avec des
 récompenses à la clé, est exactement le mécanisme qui produit de la pratique
@@ -158,15 +181,23 @@ tiers.
 
 ---
 
-## À trancher
+## Tranché le 06/11/2026
 
-1. **R1** — bons partenaires réservés aux adultes ? *(recommandé : oui)*
-2. **R1 bis** — aucun achat en argent réel en V1 ? *(recommandé : oui)*
-3. **R2** — plafond quotidien à la recommandation OMS ? *(recommandé : oui)*
-4. **Le rang gouverne-t-il les récompenses**, le niveau ne servant qu'à la progression ?
-   *(recommandé : oui)*
-5. **La boutique cosmétique** : avatar dessiné dans l'app, ou illustrations ? La seconde
+- **R1** — récompenses internes uniquement, monnaie fictive, aucun achat en argent réel.
+- **R2** — expérience quotidienne plafonnée à la recommandation de l'OMS.
+- **Aucun mécanisme punitif** : une série se met en pause, elle ne s'effondre pas ;
+  un niveau ne redescend jamais.
+- **Le rang gouverne les récompenses**, le niveau ne sert qu'à la progression.
+
+## Reste à trancher
+
+1. **La boutique cosmétique** : avatar dessiné dans l'app, ou illustrations ? La seconde
    demande un budget graphique et des droits d'usage.
-6. **Le classement** : à l'échelle de la classe uniquement, ou aussi entre
+2. **Le classement** : à l'échelle de la classe uniquement, ou aussi entre
    établissements ? Un classement nominatif entre mineurs mérite d'être discuté avant
    d'être codé.
+
+   > Une piste, pour nourrir la discussion : un classement **par classe entière** plutôt
+   > que par élève. La 5e B contre la 5e C. Personne n'est dernier tout seul, l'entraide
+   > remplace la comparaison, et c'est le professeur qui en parle en cours. Le classement
+   > nominatif reste visible de l'élève seul, pour lui-même.
